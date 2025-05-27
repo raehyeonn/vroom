@@ -1,0 +1,165 @@
+.chatContainer {
+    width: 100%;
+    max-width: 700px;
+    margin: auto;
+    font-family: sans-serif;
+}
+
+.chatRoomHeader {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 20px;
+
+    margin-bottom: 5px;
+}
+
+.chatRoomHeader a {
+    text-decoration-line: none;
+
+    font-size: 20px;
+    font-weight: bold;
+    color: #000000;
+}
+
+.chatRoomName {
+
+}
+
+.chatBox {
+    max-height: 500px;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #FFFFFF;
+}
+
+.chatBox::-webkit-scrollbar {
+    width: 5px; /* 스크롤 너비 */
+}
+
+.chatBox::-webkit-scrollbar-thumb {
+    background-color: #842622; /* 스크롤 색상 */
+    border-radius: 5px;
+}
+
+.chatBox::-webkit-scrollbar-thumb:hover {
+    background-color: #C4A1A1;
+}
+
+.chatBox::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.messageWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.chatMessage {
+    white-space: pre-wrap;
+    padding: 5px;
+    max-width: 70%;
+    word-break: break-word;
+    font-size: 12px;
+}
+
+.chatMessage.mine {
+    align-self: flex-end;
+
+    border: 1px solid #842622;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+
+    color: #000000;
+    text-align: left;
+}
+
+.chatMessage.others {
+    align-self: flex-start;
+
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+
+    background-color: #C9A036;
+
+    color: #FFFFFF;
+    text-align: left;
+}
+
+.senderNickname {
+    display: block;
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #555;
+}
+
+.sendTime {
+    font-size: 10px;
+}
+
+.sendTime.mine {
+    align-self: flex-end;
+    text-align: right;
+}
+
+.sendTime.others {
+    align-self: flex-start;
+    text-align: left;
+}
+
+.chatInput {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.chatInput textarea {
+    width: 90%;
+    font-size: 13px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    color: #333;
+    font-family: inherit;
+
+    line-height: 20px;
+    resize: none;
+    overflow-y: auto;
+
+    min-height: 40px; /* 1줄 */
+    max-height: 100px; /* 5줄 = 20px x 5 */
+}
+
+.chatInput textarea:focus {
+    border-color: #842622;
+    outline: none;
+}
+
+.chatInput button {
+    width: 10%;
+    height: 40px;
+    border: none;
+    background-color: #842622;
+    color: white;
+    cursor: pointer;
+
+}
+
+.chatInput button:hover {
+    background-color: #C4A1A1;
+}
