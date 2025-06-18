@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './ChatRoomList.module.css';
 import { jwtDecode } from 'jwt-decode';
+import CreateChatRoomModal from './CreateChatRoomModal';
 
 const ChatRoomList = () => {
     const [chatRooms, setChatRooms] = useState([]); // 채팅방 목록을 저장할 상태 변수, 초기값은 빈 배열
@@ -11,6 +12,9 @@ const ChatRoomList = () => {
     const navigate = useNavigate();
 
     const [isMember, setIsMember] = useState(false);
+
+    const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열기/닫기 상태 관리
+    const [roomTitle, setRoomTitle] = useState(''); // 방 제목 관리
 
     const handleLogout = async () => {
         try {
@@ -78,9 +82,42 @@ const ChatRoomList = () => {
         fetchChatRooms(); // fetchChatRooms 함수를 호출하여 채팅방 목록을 가져옵니다.
     }, []);
 
+    const handleCreateRoom = async (title) => {
+        try {
+            // 로컬 스토리지에서 토큰 가져오기
+            const token = localStorage.getItem('accessToken');
+
+            if (!token) {
+                alert('로그인이 필요합니다!');
+                return;
+            }
+
+            // 헤더에 Authorization 토큰을 추가하여 API 호출
+            const response = await axios.post(
+                'http://localhost:8080/api/chat-rooms',
+                { name: title }, // 채팅방 이름
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Authorization 헤더에 JWT 토큰 추가
+                    },
+                }
+            );
+
+            // 성공적으로 생성되면 알림
+            alert(`${response.data.name} 채팅방이 생성되었습니다!`);
+            setIsModalOpen(false); // 모달 닫기
+
+            // 채팅방 목록을 갱신 (추가 요청 또는 새로고침)
+            setChatRooms(prevRooms => [...prevRooms, response.data]);
+        } catch (err) {
+            console.error('채팅방 생성 오류:', err);
+            alert('채팅방 생성 실패');
+        }
+    };
+
     // 로딩 중일 때 표시할 메시지
     if (loading) {
-        return <div>Loading...</div>;
+        return <div>로딩 중...</div>;
     }
 
     // 에러가 있을 경우 표시할 메시지
@@ -89,35 +126,39 @@ const ChatRoomList = () => {
     }
 
     return (
-        <div className={styles.chatRoomListContainer}>
-            <header className={styles.header}>
-                <span className={styles.headerTitle}>VROOM</span>
+        <div className={styles.pageContainer}>
+            <div className={styles.pageHeader}>
+                <span className={styles.logo}>VROOM</span>
 
                 {localStorage.getItem('accessToken')
                     ? (<button className={styles.logoutButton} onClick={handleLogout}>로그아웃</button>)
                     : (<button className={styles.loginButton} onClick={() => navigate('/login')}>로그인 / 회원가입</button>)
                 }
-            </header>
-
-
-            <div>
-                <div>
-                    <p className={styles.list}>현재 채팅방 목록</p>
-                    {isMember && (<button onClick={() => alert('채팅방 만들기!')}>채팅방 만들기</button>)}
-                </div>
-
-                <ul className={styles.chatRoomList}>
-                    {chatRooms.map((room, index) => (
-                        <li key={index} className={styles.chatRoom}>
-                            <p className={styles.chatRoomName}>{room.name}</p>
-                            <button className={styles.enterButton}
-                                    onClick={() => navigate(
-                                        `/chats/${room.id}`)}>입장 >
-                            </button>
-                        </li>
-                    ))}
-                </ul>
             </div>
+
+            <div className={styles.pageBody}>
+                <div className={styles.chatRoomListSection}>
+                    <div className={styles.chatRoomListTop}>
+                        <p className={styles.chatRoomListTitle}>현재 채팅방 목록</p>
+                        {isMember && (<button className={styles.createChatRoomButton} onClick={() => setIsModalOpen(true)}>채팅방 만들기</button>)}
+                    </div>
+
+                    <ul className={styles.chatRoomList}>
+                        {chatRooms.map((room, index) => (
+                            <li key={index} className={styles.chatRoom}>
+                                <p className={styles.chatRoomName}>{room.name}</p>
+                                <button className={styles.enterChatRoomButton} onClick={() => navigate(`/chats/${room.id}`)}>입장 ></button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
+
+            <CreateChatRoomModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)} // 모달 닫기
+                onCreate={handleCreateRoom} // 방 생성 함수
+            />
         </div>
     );
 };

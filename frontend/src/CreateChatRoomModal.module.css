@@ -1,0 +1,71 @@
+.createChatRoomModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.createChatRoomModal {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 5px;
+    width: 320px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modalTitle {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.chatRoomTitleInput {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+}
+
+.chatRoomTitleInput:focus {
+    border-color: #842622;
+    outline: none;
+}
+
+.modalActions {
+    text-align: right;
+}
+
+.cancelButton {
+    width: 100px;
+    height: 40px;
+    border: 1px solid #E9E9E9;
+}
+
+.cancelButton:hover {
+    border: none;
+    background-color: #842622;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    color: #FFFFFF;
+}
+
+.createButton {
+    width: 100px;
+    height: 40px;
+    border: 1px solid #E9E9E9;
+
+    margin-left: 10px;
+}
+
+.createButton:hover {
+    border: none;
+    background-color: #C9A036;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    color: #FFFFFF;
+}
