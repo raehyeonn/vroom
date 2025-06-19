@@ -13,8 +13,10 @@ const ChatRoomList = () => {
 
     const [isMember, setIsMember] = useState(false);
 
+    const [currentPage, setCurrentPage] = useState(0); // 0부터 시작
+    const [totalPages, setTotalPages] = useState(0);
+
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열기/닫기 상태 관리
-    const [roomTitle, setRoomTitle] = useState(''); // 방 제목 관리
 
     const handleLogout = async () => {
         try {
@@ -35,52 +37,53 @@ const ChatRoomList = () => {
         }
     };
 
-    // useEffect는 컴포넌트가 렌더링된 후에 실행되는 부수 효과를 처리하는 데 사용
-    // 여기서 [] 빈 배열을 두 번째 인자로 주면 컴포넌트가 처음 렌더링될 때 한 번만 실행됩니다.
     useEffect(() => {
-        console.log('useEffect 실행됨');
-
-        const token = localStorage.getItem('accessToken'); // 토큰을 localStorage에서 가져오기
+        const token = localStorage.getItem('accessToken');
         if (token) {
             try {
-                const decoded = jwtDecode(token); // JWT 디코딩
-                const roles = decoded.authorities || []; // roles가 배열로 존재한다고 가정
+                const decoded = jwtDecode(token);
+                const roles = decoded.authorities || [];
                 console.log('Decoded roles:', roles);
 
-                if (roles.includes('ROLE_MEMBER')) { // 권한에 ROLE_MEMBER가 포함되어 있는지 확인
-                    setIsMember(true); // 권한이 있다면 채팅방 만들기 버튼 보이기
+                if (roles.includes('ROLE_MEMBER')) {
+                    setIsMember(true);
                 }
             } catch (err) {
                 console.error('JWT decode error:', err);
             }
         }
+    }, []);
 
-
-        // 채팅방 목록을 가져오는 비동기 함수(async 키워드가 붙어있어 비동기적으로 처리)
-        const fetchChatRooms = async () => {
+    useEffect(() => {
+        const fetchChatRoomsByPage = async () => {
+            setLoading(true);
             try {
-                // axios.get()은 http://localhost:8080/api/chats/room에서 채팅방 목록을 가져옴
-                // await를 사용하여 비동기적으로 데이터를 기다림.
                 const response = await axios.get('http://localhost:8080/api/chat-rooms', {
                     params: {
-                        page: 0, // 첫 페이지
-                        size: 10, // 한 페이지에 보여줄 채팅방 수
+                        page: currentPage,
+                        size: 10,
+                        sort: 'createdAt,desc'
                     },
                 });
 
-                console.log('API 응답:', response.data);
+                const { content, totalPages } = response.data;
 
-                setChatRooms(response.data.content.filter(room => room.name)); // 각 채팅방 객체에서 roomName이 존재하는 채팅방만 필터링하여 chatRooms 상태에 저장합니다.
+                setChatRooms(content.filter(room => room.name));
+                setTotalPages(totalPages);
             } catch (err) {
                 console.error('API 호출 에러:', err);
                 setError('채팅방 목록을 가져오는 데 실패했습니다.');
             } finally {
-                setLoading(false); // loading 상태를 false로 설정하여 로딩이 끝났음을 표시합니다.
+                setLoading(false);
             }
         };
 
-        fetchChatRooms(); // fetchChatRooms 함수를 호출하여 채팅방 목록을 가져옵니다.
-    }, []);
+        fetchChatRoomsByPage();
+    }, [currentPage]); // 페이지 변경 시 다시 호출
+
+    const handlePageChange = (pageIndex) => {
+        setCurrentPage(pageIndex);
+    };
 
     const handleCreateRoom = async (title) => {
         try {
@@ -108,7 +111,7 @@ const ChatRoomList = () => {
             setIsModalOpen(false); // 모달 닫기
 
             // 채팅방 목록을 갱신 (추가 요청 또는 새로고침)
-            setChatRooms(prevRooms => [...prevRooms, response.data]);
+            setCurrentPage(0);
         } catch (err) {
             console.error('채팅방 생성 오류:', err);
             alert('채팅방 생성 실패');
@@ -140,17 +143,37 @@ const ChatRoomList = () => {
                 <div className={styles.chatRoomListSection}>
                     <div className={styles.chatRoomListTop}>
                         <p className={styles.chatRoomListTitle}>현재 채팅방 목록</p>
-                        {isMember && (<button className={styles.createChatRoomButton} onClick={() => setIsModalOpen(true)}>채팅방 만들기</button>)}
+                        {isMember && (
+                            <button className={styles.createChatRoomButton}
+                                    onClick={() => setIsModalOpen(true)}>채팅방
+                                만들기</button>)}
                     </div>
 
                     <ul className={styles.chatRoomList}>
                         {chatRooms.map((room, index) => (
                             <li key={index} className={styles.chatRoom}>
                                 <p className={styles.chatRoomName}>{room.name}</p>
-                                <button className={styles.enterChatRoomButton} onClick={() => navigate(`/chats/${room.id}`)}>입장 ></button>
+                                <button className={styles.enterChatRoomButton}
+                                        onClick={() => navigate(
+                                            `/chats/${room.id}`)}>입장 >
+                                </button>
                             </li>
                         ))}
                     </ul>
+
+                    <div className={styles.pagination}>
+                        {Array.from({length: totalPages}, (_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => handlePageChange(i)}
+                                className={currentPage === i
+                                    ? styles.activePageButton
+                                    : styles.pageButton}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 

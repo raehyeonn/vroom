@@ -75,7 +75,7 @@
   width: 100px;
   height: 40px;
   border: 1px solid #E9E9E9;
-
+  background-color: #C9C9C9;
 }
 
 .createChatRoomButton:hover {
@@ -113,5 +113,32 @@
   border: none;
   background-color: #FFFFFF;
   padding: 5px 10px;
+  cursor: pointer;
+}
+
+.pageButton {
+  margin: 4px;
+  padding: 4px 8px;
+
+  background: none;
+  border: none;
+
+  color: #C9C9C9;
+  font-size: 16px;
+
+  cursor: pointer;
+}
+
+.activePageButton {
+  margin: 4px;
+  padding: 4px 8px;
+
+  background: none;
+  border: none;
+
+  color: #842622;
+  font-size: 16px;
+  font-weight: bold;
+
   cursor: pointer;
 }
