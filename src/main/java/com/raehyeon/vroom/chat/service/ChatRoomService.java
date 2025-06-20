@@ -6,6 +6,8 @@ import com.raehyeon.vroom.chat.domain.ChatRoom;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
+import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
+import com.raehyeon.vroom.chat.exception.ChatRoomNotFoundException;
 import com.raehyeon.vroom.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -36,6 +38,12 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
 
         return chatRoomDtoConverter.toCreateChatRoomResponse(chatRoom); // 응답 반환
+    }
+
+    public GetChatRoomDetailResponse getById(Long chatRoomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+
+        return chatRoomDtoConverter.toGetChatRoomDetailResponse(chatRoom);
     }
 
 }

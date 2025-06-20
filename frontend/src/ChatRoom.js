@@ -6,6 +6,7 @@ import styles from './ChatRoom.module.css';
 const ChatRoom = () => {
     const { chatRoomId } = useParams();
     const numericChatRoomId = Number(chatRoomId);
+    const [chatRoomName, setChatRoomName] = useState('');
 
     useEffect(() => {
         console.log("chatRoomId:", chatRoomId);  // chatRoomId 확인
@@ -73,6 +74,35 @@ const ChatRoom = () => {
         stompClient.current?.deactivate();
     };
 
+    useEffect(() => {
+        const fetchChatRoomName = async () => {
+            const token = localStorage.getItem('accessToken'); // 토큰 가져오기
+            if (!token) {
+                console.error("❌ JWT 토큰이 없습니다. 로그인 먼저 해주세요.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8080/api/chat-rooms/${chatRoomId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error("채팅방 정보를 가져오는 데 실패했습니다.");
+                }
+
+                const data = await response.json();
+                setChatRoomName(data.roomName);
+            } catch (error) {
+                console.error('❌ 채팅방 이름 조회 실패:', error);
+            }
+        };
+
+        fetchChatRoomName();
+    }, [chatRoomId]);
+
     const sendMessage = () => {
         console.log("✅ [sendMessage 호출됨]");
         console.log("입력한 메시지:", message);
@@ -121,16 +151,12 @@ const ChatRoom = () => {
         textarea.style.height = `${newHeight}px`;
     };
 
-
-
-
     return (
         <div className={styles.chatContainer}>
             <header className={styles.chatRoomHeader}>
                 <a href="/">&lt;</a>
-                <span className={styles.chatRoomName}>채팅방: {chatRoomId}</span>
+                <span className={styles.chatRoomName}>채팅방: {chatRoomName}</span>
             </header>
-
 
             <div className={styles.chatBox}>
                 {messages.map((msg, idx) => {

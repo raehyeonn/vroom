@@ -3,6 +3,7 @@ package com.raehyeon.vroom.chat.converter;
 import com.raehyeon.vroom.chat.domain.ChatRoom;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
+import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,6 +22,12 @@ public class ChatRoomDtoConverter {
             .name(chatRoom.getName())
             .code(chatRoom.getCode())
             .createdAt(chatRoom.getCreatedAt())
+            .build();
+    }
+
+    public GetChatRoomDetailResponse toGetChatRoomDetailResponse(ChatRoom chatRoom) {
+        return GetChatRoomDetailResponse.builder()
+            .roomName(chatRoom.getName())
             .build();
     }
 
