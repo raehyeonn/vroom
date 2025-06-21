@@ -5,8 +5,10 @@ import com.raehyeon.vroom.member.converter.MemberDtoConverter;
 import com.raehyeon.vroom.member.domain.Member;
 import com.raehyeon.vroom.member.dto.CreateMemberRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberResponse;
+import com.raehyeon.vroom.member.dto.GetMyInfoResponse;
 import com.raehyeon.vroom.member.exception.DuplicateEmailException;
 import com.raehyeon.vroom.member.exception.DuplicateNicknameException;
+import com.raehyeon.vroom.member.exception.MemberNotFoundException;
 import com.raehyeon.vroom.member.repository.MemberRepository;
 import com.raehyeon.vroom.role.domain.MemberRole;
 import com.raehyeon.vroom.role.domain.Role;
@@ -14,6 +16,7 @@ import com.raehyeon.vroom.role.domain.RoleType;
 import com.raehyeon.vroom.role.repository.MemberRoleRepository;
 import com.raehyeon.vroom.role.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +55,12 @@ public class MemberService {
 
 
         return memberDtoConverter.toCreateMemberResponse(member);
+    }
+
+    public GetMyInfoResponse getMine(UserDetails userDetails) {
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+
+        return memberDtoConverter.toGetMyInfoResponse(member);
     }
 
 }
