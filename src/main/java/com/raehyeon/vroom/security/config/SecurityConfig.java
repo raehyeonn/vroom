@@ -40,11 +40,15 @@ public class SecurityConfig {
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/ws/**").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name()) // ws 경로에 대한 요청 허용
                 .requestMatchers("/", "/api/auth/login").permitAll()
+
                 .requestMatchers(HttpMethod.POST, "/api/members").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/members/me").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.POST, "/api/members/nickname").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+
                 .requestMatchers(HttpMethod.POST, "/api/chat-rooms").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{id}").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+
                 .anyRequest().authenticated()
             );
 

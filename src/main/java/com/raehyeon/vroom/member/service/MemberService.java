@@ -3,6 +3,7 @@ package com.raehyeon.vroom.member.service;
 import com.raehyeon.vroom.member.converter.MemberEntityConverter;
 import com.raehyeon.vroom.member.converter.MemberDtoConverter;
 import com.raehyeon.vroom.member.domain.Member;
+import com.raehyeon.vroom.member.dto.ChangeNicknameRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberResponse;
 import com.raehyeon.vroom.member.dto.GetMyInfoResponse;
@@ -61,6 +62,18 @@ public class MemberService {
         Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
 
         return memberDtoConverter.toGetMyInfoResponse(member);
+    }
+
+    @Transactional
+    public void changeNickname(UserDetails userDetails, ChangeNicknameRequest changeNicknameRequest) {
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        String nickname = changeNicknameRequest.getNickname();
+
+        if(memberRepository.existsByNickname(nickname)) {
+            throw new DuplicateNicknameException("이미 사용 중인 닉네임입니다.");
+        }
+
+        member.changeNickname(nickname);
     }
 
 }

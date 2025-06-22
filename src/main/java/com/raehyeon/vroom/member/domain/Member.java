@@ -47,4 +47,8 @@ public class Member {
     @CreationTimestamp(source = SourceType.DB)
     private ZonedDateTime createdAt;
 
+    public void changeNickname(String newNickname) {
+        this.nickname = newNickname;
+    }
+
 }

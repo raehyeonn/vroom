@@ -1,9 +1,11 @@
 package com.raehyeon.vroom.member.controller;
 
+import com.raehyeon.vroom.member.dto.ChangeNicknameRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberResponse;
 import com.raehyeon.vroom.member.dto.GetMyInfoResponse;
 import com.raehyeon.vroom.member.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +30,11 @@ public class MemberController {
     @GetMapping("/me")
     public GetMyInfoResponse getMine(@AuthenticationPrincipal UserDetails userDetails) {
         return memberService.getMine(userDetails);
+    }
+
+    @PostMapping("/nickname")
+    public void changeNickname(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid ChangeNicknameRequest changeNicknameRequest) {
+        memberService.changeNickname(userDetails, changeNicknameRequest);
     }
 
 }
