@@ -3,6 +3,7 @@ package com.raehyeon.vroom.chat.controller;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
+import com.raehyeon.vroom.chat.dto.GetChatRoomByCodeResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
 import com.raehyeon.vroom.chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,11 @@ public class ChatRoomController {
     @GetMapping("/{chatRoomId}")
     public GetChatRoomDetailResponse getById(@PathVariable Long chatRoomId) {
         return chatRoomService.getById(chatRoomId);
+    }
+
+    @GetMapping("/by-code/{chatRoomCode}")
+    public GetChatRoomByCodeResponse getByCode(@PathVariable String chatRoomCode) {
+        return chatRoomService.getByCode(chatRoomCode);
     }
 
 }
