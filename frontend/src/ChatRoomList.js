@@ -10,13 +10,11 @@ const ChatRoomList = () => {
     const [loading, setLoading] = useState(true); // 데이터를 가져오는 동안 로딩 상태를 나타내는 변수, 초기값은 true(=데이터를 가져오는 동안 로딩 화면 표시)
     const [error, setError] = useState(null); // API 호출 시 오류 메세지를 저장하는 변수, 초기값은 null
     const navigate = useNavigate();
-
     const [isMember, setIsMember] = useState(false);
-
     const [currentPage, setCurrentPage] = useState(0); // 0부터 시작
     const [totalPages, setTotalPages] = useState(0);
-
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열기/닫기 상태 관리
+    const [searchCode, setSearchCode] = useState('');
 
     const handleLogout = async () => {
         try {
@@ -118,6 +116,40 @@ const ChatRoomList = () => {
         }
     };
 
+    const handleSearch = async () => {
+
+        const token = localStorage.getItem('accessToken');
+
+        if (!token) {
+            alert('로그인이 필요합니다!');
+            return;
+        }
+
+        if (!searchCode) {
+            alert('코드를 입력해주세요!');
+            return;
+        }
+
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/api/chat-rooms/by-code/${searchCode}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
+            const chatRoom = response.data;
+
+            setChatRooms([chatRoom]); // 배열로 덮어씌움
+            setTotalPages(1);         // 페이지네이션 숨기거나 고정
+            setCurrentPage(0);
+        } catch (err) {
+            console.error('채팅방 검색 오류:', err);
+            alert('해당 코드의 채팅방을 찾을 수 없습니다.');
+        }
+    };
+
     // 로딩 중일 때 표시할 메시지
     if (loading) {
         return <div>로딩 중...</div>;
@@ -141,6 +173,12 @@ const ChatRoomList = () => {
 
             <div className={styles.pageBody}>
                 <div className={styles.chatRoomListSection}>
+                    <input type="text"
+                           placeholder="코드를 입력하세요"
+                           value={searchCode}
+                           onChange={(e) => setSearchCode(e.target.value)}></input>
+                    <button onClick={handleSearch}>검색</button>
+
                     <div className={styles.chatRoomListTop}>
                         <p className={styles.chatRoomListTitle}>현재 채팅방 목록</p>
                         {isMember && (
