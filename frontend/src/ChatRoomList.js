@@ -101,6 +101,7 @@ const ChatRoomList = () => {
                     headers: {
                         'Authorization': `Bearer ${token}`, // Authorization 헤더에 JWT 토큰 추가
                     },
+                    withCredentials: true
                 }
             );
 
@@ -136,7 +137,8 @@ const ChatRoomList = () => {
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`
-                    }
+                    },
+                    withCredentials: true
                 }
             );
             const chatRoom = response.data;
