@@ -34,7 +34,7 @@ public class ChatRoomService {
 
     @Transactional
     public CreateChatRoomResponse createChatRoom(CreateChatRoomRequest createChatRoomRequest) {
-        String chatRoomCode = RandomStringUtils.randomAlphanumeric(10); // 영문자와 숫자에서 랜덤한 10자리 생성
+        String chatRoomCode = RandomStringUtils.random(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         ChatRoom chatRoom = chatRoomEntityConverter.toEntity(createChatRoomRequest, chatRoomCode);
         chatRoomRepository.save(chatRoom);
 
