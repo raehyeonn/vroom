@@ -194,8 +194,7 @@ const ChatRoomList = () => {
                             <li key={index} className={styles.chatRoom}>
                                 <p className={styles.chatRoomName}>{room.name}</p>
                                 <button className={styles.enterChatRoomButton}
-                                        onClick={() => navigate(
-                                            `/chats/${room.id}`)}>입장 >
+                                        onClick={() => window.open(`/chats/${room.id}`, '_blank')}>입장 >
                                 </button>
                             </li>
                         ))}
