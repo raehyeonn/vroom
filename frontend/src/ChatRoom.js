@@ -86,7 +86,8 @@ const ChatRoom = () => {
                 const response = await fetch(`http://localhost:8080/api/chat-rooms/${chatRoomId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
-                    }
+                    },
+                    credentials: 'include'
                 });
 
                 if (!response.ok) {
@@ -153,9 +154,12 @@ const ChatRoom = () => {
 
     return (
         <div className={styles.chatContainer}>
+
             <header className={styles.chatRoomHeader}>
                 <a href="/">&lt;</a>
                 <span className={styles.chatRoomName}>채팅방: {chatRoomName}</span>
+                <img className={styles.infoImg} alt="안내표" src="/info_Icon.png"
+                     onClick={() => alert(`채팅방 이름: ${chatRoomName}`)}></img>
             </header>
 
             <div className={styles.chatBox}>
@@ -167,11 +171,15 @@ const ChatRoom = () => {
 
                     return (
                         <div key={idx} className={styles.messageWrapper}>
-                            {!isMine && (<span className={styles.senderNickname}>{msg.senderNickname}</span>)}
-                            <div className={`${styles.chatMessage} ${isMine ? styles.mine : styles.others}`}>
+                            {!isMine && (<span
+                                className={styles.senderNickname}>{msg.senderNickname}</span>)}
+                            <div className={`${styles.chatMessage} ${isMine
+                                ? styles.mine : styles.others}`}>
                                 {msg.content}
                             </div>
-                            <span className={`${styles.sendTime} ${isMine ? styles.mine : styles.others}`}>{time}</span>
+                            <span className={`${styles.sendTime} ${isMine
+                                ? styles.mine
+                                : styles.others}`}>{time}</span>
                         </div>
                     );
                 })}
