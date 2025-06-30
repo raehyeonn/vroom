@@ -9,6 +9,7 @@ import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomByCodeResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
 import com.raehyeon.vroom.chat.exception.ChatRoomNotFoundException;
+import com.raehyeon.vroom.chat.exception.ChatRoomPasswordRequiredException;
 import com.raehyeon.vroom.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -43,7 +44,7 @@ public class ChatRoomService {
             String rawPassword = createChatRoomRequest.getPassword();
 
             if(rawPassword == null || rawPassword.isBlank()) {
-                throw new ChatRoomNotFoundException("채팅방 비밀번호가 필요합니다.");
+                throw new ChatRoomPasswordRequiredException("채팅방 비밀번호가 필요합니다.");
             }
 
             encodedPassword = passwordEncoder.encode(rawPassword);
