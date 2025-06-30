@@ -83,7 +83,7 @@ const ChatRoomList = () => {
         setCurrentPage(pageIndex);
     };
 
-    const handleCreateRoom = async (title) => {
+    const handleCreateRoom = async (roomData) => {
         try {
             // 로컬 스토리지에서 토큰 가져오기
             const token = localStorage.getItem('accessToken');
@@ -96,7 +96,10 @@ const ChatRoomList = () => {
             // 헤더에 Authorization 토큰을 추가하여 API 호출
             const response = await axios.post(
                 'http://localhost:8080/api/chat-rooms',
-                { name: title }, // 채팅방 이름
+                { name: roomData.roomTitle,
+                    isPrivate: roomData.isPrivate,
+                    isPasswordRequired: roomData.isPasswordRequired,
+                    password: roomData.password }, // 채팅방 이름
                 {
                     headers: {
                         'Authorization': `Bearer ${token}`, // Authorization 헤더에 JWT 토큰 추가

@@ -7,10 +7,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChatRoomEntityConverter {
 
-    public ChatRoom toEntity(CreateChatRoomRequest createChatRoomRequest, String chatRoomCode) {
+    public ChatRoom toEntity(CreateChatRoomRequest createChatRoomRequest, String code, String encodedPassword) {
         return ChatRoom.builder()
             .name(createChatRoomRequest.getName())
-            .code(chatRoomCode)
+            .code(code)
+            .isPrivate(createChatRoomRequest.isPrivate())
+            .isPasswordRequired(createChatRoomRequest.isPasswordRequired())
+            .password(encodedPassword)
             .build();
     }
 

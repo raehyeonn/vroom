@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ChatRoomService {
 
+    private final PasswordEncoder passwordEncoder;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomDtoConverter chatRoomDtoConverter;
     private final ChatRoomEntityConverter chatRoomEntityConverter;
@@ -34,8 +36,20 @@ public class ChatRoomService {
 
     @Transactional
     public CreateChatRoomResponse createChatRoom(CreateChatRoomRequest createChatRoomRequest) {
-        String chatRoomCode = RandomStringUtils.random(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        ChatRoom chatRoom = chatRoomEntityConverter.toEntity(createChatRoomRequest, chatRoomCode);
+        String code = RandomStringUtils.random(10, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        String encodedPassword = null;
+
+        if(createChatRoomRequest.isPasswordRequired()) {
+            String rawPassword = createChatRoomRequest.getPassword();
+
+            if(rawPassword == null || rawPassword.isBlank()) {
+                throw new ChatRoomNotFoundException("채팅방 비밀번호가 필요합니다.");
+            }
+
+            encodedPassword = passwordEncoder.encode(rawPassword);
+        }
+
+        ChatRoom chatRoom = chatRoomEntityConverter.toEntity(createChatRoomRequest, code, encodedPassword);
         chatRoomRepository.save(chatRoom);
 
         return chatRoomDtoConverter.toCreateChatRoomResponse(chatRoom); // 응답 반환

@@ -32,6 +32,15 @@ public class ChatRoom {
     @Column(nullable = false, unique = true)
     private String code;
 
+    @Column(nullable = false)
+    private boolean isPrivate;
+
+    @Column(nullable = false)
+    private boolean isPasswordRequired;
+
+    @Column
+    private String password;
+
     @Column(nullable = false, updatable = false)
     @CreationTimestamp(source = SourceType.DB)
     private ZonedDateTime createdAt;
