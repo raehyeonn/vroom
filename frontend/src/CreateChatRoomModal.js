@@ -2,33 +2,33 @@ import React, { useState } from 'react';
 import styles from './CreateChatRoomModal.module.css';
 
 const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
-    const [roomTitle, setRoomTitle] = useState('');
-    const [isPrivate, setIsPrivate] = useState(false);
-    const [isPasswordRequired, setIsPasswordRequired] = useState(false);
+    const [name, setName] = useState('');
+    const [hidden, setHidden] = useState(false);
+    const [passwordRequired, setPasswordRequired] = useState(false);
     const [password, setPassword] = useState('');
 
     const handleCreate = () => {
-        if (!roomTitle.trim()) {
+        if (!name.trim()) {
             alert('채팅방 이름을 입력해주세요.');
             return;
         }
 
-        if (isPasswordRequired && !password.trim()) {
+        if (passwordRequired && !password.trim()) {
             alert('비밀번호를 입력해주세요.');
             return;
         }
 
         onCreate({
-            roomTitle,
-            isPrivate,
-            isPasswordRequired,
-            password: isPasswordRequired ? password : null,
+            name,
+            hidden,
+            passwordRequired,
+            password: passwordRequired ? password : null,
         });
 
         // 초기화
-        setRoomTitle('');
-        setIsPrivate(false);
-        setIsPasswordRequired(false);
+        setName('');
+        setHidden(false);
+        setPasswordRequired(false);
         setPassword('');
         onClose();
     };
@@ -48,8 +48,8 @@ const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
                         className={styles.chatRoomTitleInput}
                         type="text"
                         placeholder="방 제목을 입력하세요"
-                        value={roomTitle}
-                        onChange={(e) => setRoomTitle(e.target.value)}
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
                     />
 
                     <div className={styles.radioGroup}>
@@ -59,8 +59,8 @@ const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
                                 type="radio"
                                 name="private"
                                 value="false"
-                                checked={!isPrivate}
-                                onChange={() => setIsPrivate(false)}
+                                checked={!hidden}
+                                onChange={() => setHidden(false)}
                             />
                             공개방
                         </label>
@@ -69,8 +69,8 @@ const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
                                 type="radio"
                                 name="private"
                                 value="true"
-                                checked={isPrivate}
-                                onChange={() => setIsPrivate(true)}
+                                checked={hidden}
+                                onChange={() => setHidden(true)}
                             />
                             비공개방
                         </label>
@@ -83,8 +83,8 @@ const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
                                 type="radio"
                                 name="passwordRequired"
                                 value="false"
-                                checked={!isPasswordRequired}
-                                onChange={() => setIsPasswordRequired(false)}
+                                checked={!passwordRequired}
+                                onChange={() => setPasswordRequired(false)}
                             />
                             사용 안 함
                         </label>
@@ -93,8 +93,8 @@ const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
                                 type="radio"
                                 name="passwordRequired"
                                 value="true"
-                                checked={isPasswordRequired}
-                                onChange={() => setIsPasswordRequired(true)}
+                                checked={passwordRequired}
+                                onChange={() => setPasswordRequired(true)}
                             />
                             사용함
                         </label>
@@ -106,7 +106,7 @@ const CreateChatRoomModal = ({ isOpen, onClose, onCreate }) => {
                         placeholder="비밀번호 입력"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        disabled={!isPasswordRequired}
+                        disabled={!passwordRequired}
                     />
 
                 </div>

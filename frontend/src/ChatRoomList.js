@@ -96,9 +96,9 @@ const ChatRoomList = () => {
             // 헤더에 Authorization 토큰을 추가하여 API 호출
             const response = await axios.post(
                 'http://localhost:8080/api/chat-rooms',
-                { name: roomData.roomTitle,
-                    isPrivate: roomData.isPrivate,
-                    isPasswordRequired: roomData.isPasswordRequired,
+                { name: roomData.name,
+                    hidden: roomData.hidden,
+                    passwordRequired: roomData.passwordRequired,
                     password: roomData.password }, // 채팅방 이름
                 {
                     headers: {
