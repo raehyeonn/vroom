@@ -8,8 +8,8 @@ import lombok.Getter;
 public class CreateChatRoomRequest {
 
     private String name;
-    private boolean isPrivate;
-    private boolean isPasswordRequired;
+    private boolean hidden;
+    private boolean passwordRequired;
     private String password;
 
 }

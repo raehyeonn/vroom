@@ -33,10 +33,10 @@ public class ChatRoom {
     private String code;
 
     @Column(nullable = false)
-    private boolean isPrivate;
+    private boolean hidden;
 
     @Column(nullable = false)
-    private boolean isPasswordRequired;
+    private boolean passwordRequired;
 
     @Column
     private String password;

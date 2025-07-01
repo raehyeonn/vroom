@@ -11,8 +11,8 @@ public class ChatRoomEntityConverter {
         return ChatRoom.builder()
             .name(createChatRoomRequest.getName())
             .code(code)
-            .isPrivate(createChatRoomRequest.isPrivate())
-            .isPasswordRequired(createChatRoomRequest.isPasswordRequired())
+            .hidden(createChatRoomRequest.isHidden())
+            .passwordRequired(createChatRoomRequest.isPasswordRequired())
             .password(encodedPassword)
             .build();
     }
