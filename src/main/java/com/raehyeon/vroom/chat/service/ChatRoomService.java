@@ -30,7 +30,7 @@ public class ChatRoomService {
     private final ChatRoomEntityConverter chatRoomEntityConverter;
 
     public Page<GetAllChatRoomsResponse> getAllChatRooms(Pageable pageable) {
-        Page<ChatRoom> page = chatRoomRepository.findAll(pageable);
+        Page<ChatRoom> page = chatRoomRepository.findByHiddenFalse(pageable);
 
         return page.map(chatRoomDtoConverter::toGetAllChatRoomsResponse);
     }
