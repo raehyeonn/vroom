@@ -14,6 +14,7 @@ public class ChatRoomDtoConverter {
         return GetAllChatRoomsResponse.builder()
             .id(chatRoom.getId())
             .name(chatRoom.getName())
+            .passwordRequired(chatRoom.isPasswordRequired())
             .build();
     }
 

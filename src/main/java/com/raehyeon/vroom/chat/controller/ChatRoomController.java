@@ -5,6 +5,7 @@ import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomByCodeResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
+import com.raehyeon.vroom.chat.dto.VerifyChatRoomPasswordRequest;
 import com.raehyeon.vroom.chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,11 @@ public class ChatRoomController {
     @GetMapping("/by-code/{chatRoomCode}")
     public GetChatRoomByCodeResponse getByCode(@PathVariable String chatRoomCode) {
         return chatRoomService.getByCode(chatRoomCode);
+    }
+
+    @PostMapping("/{chatRoomId}/enter")
+    public boolean enter(@PathVariable Long chatRoomId, @RequestBody VerifyChatRoomPasswordRequest verifyChatRoomPasswordRequest) {
+        return chatRoomService.enterChatRoom(chatRoomId, verifyChatRoomPasswordRequest);
     }
 
 }

@@ -4,6 +4,7 @@ import axios from 'axios';
 import styles from './ChatRoomList.module.css';
 import { jwtDecode } from 'jwt-decode';
 import CreateChatRoomModal from './CreateChatRoomModal';
+import VerifyChatRoomPasswordModal from "./VerifyChatRoomPasswordModal";
 
 const ChatRoomList = () => {
     const [chatRooms, setChatRooms] = useState([]); // 채팅방 목록을 저장할 상태 변수, 초기값은 빈 배열
@@ -15,6 +16,9 @@ const ChatRoomList = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열기/닫기 상태 관리
     const [searchCode, setSearchCode] = useState('');
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+    const [selectedRoomId, setSelectedRoomId] = useState(null);
+    const [passwordInput, setPasswordInput] = useState('');
 
     const handleLogout = async () => {
         try {
@@ -155,6 +159,46 @@ const ChatRoomList = () => {
         }
     };
 
+    const handleEnterRoom = (room) => {
+        if (room.passwordRequired) {
+            setSelectedRoomId(room.id);
+            setPasswordInput('');
+            setPasswordModalOpen(true);
+        } else {
+            window.open(`/chats/${room.id}`, '_blank');
+        }
+    };
+
+    const verifyPasswordAndEnter = async () => {
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                alert('로그인이 필요합니다!');
+                return;
+            }
+            const response = await axios.post(
+                `http://localhost:8080/api/chat-rooms/${selectedRoomId}/enter`,
+                { password: passwordInput },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            if (response.data === true) {
+                setPasswordModalOpen(false);
+                window.open(`/chats/${selectedRoomId}`, '_blank');
+            } else {
+                alert('비밀번호가 틀렸습니다.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('비밀번호 확인 중 오류가 발생했습니다.');
+        }
+    };
+
     // 로딩 중일 때 표시할 메시지
     if (loading) {
         return <div>로딩 중...</div>;
@@ -197,7 +241,7 @@ const ChatRoomList = () => {
                             <li key={index} className={styles.chatRoom}>
                                 <p className={styles.chatRoomName}>{room.name}</p>
                                 <button className={styles.enterChatRoomButton}
-                                        onClick={() => window.open(`/chats/${room.id}`, '_blank')}>입장 >
+                                        onClick={() => handleEnterRoom(room)}>입장 >
                                 </button>
                             </li>
                         ))}
@@ -224,6 +268,15 @@ const ChatRoomList = () => {
                 onClose={() => setIsModalOpen(false)} // 모달 닫기
                 onCreate={handleCreateRoom} // 방 생성 함수
             />
+
+            <VerifyChatRoomPasswordModal
+                isOpen={passwordModalOpen}
+                onClose={() => setPasswordModalOpen(false)}
+                onConfirm={verifyPasswordAndEnter}
+                password={passwordInput}
+                setPassword={setPasswordInput}
+            />
+
         </div>
     );
 };
