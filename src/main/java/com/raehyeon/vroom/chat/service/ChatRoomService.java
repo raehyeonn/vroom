@@ -75,4 +75,10 @@ public class ChatRoomService {
         return passwordEncoder.matches(verifyChatRoomPasswordRequest.getPassword(), chatRoom.getPassword());
     }
 
+    public boolean passwordRequired(Long chatRoomId) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+
+        return chatRoom.isPasswordRequired();
+    }
+
 }

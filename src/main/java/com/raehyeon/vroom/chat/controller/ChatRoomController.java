@@ -49,4 +49,9 @@ public class ChatRoomController {
         return chatRoomService.enterChatRoom(chatRoomId, verifyChatRoomPasswordRequest);
     }
 
+    @GetMapping("/{chatRoomId}/passwordRequired")
+    public boolean passwordRequired(@PathVariable Long chatRoomId) {
+        return chatRoomService.passwordRequired(chatRoomId);
+    }
+
 }
