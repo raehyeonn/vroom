@@ -1,12 +1,16 @@
 package com.raehyeon.vroom.chat.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,5 +48,8 @@ public class ChatRoom {
     @Column(nullable = false, updatable = false)
     @CreationTimestamp(source = SourceType.DB)
     private ZonedDateTime createdAt;
+
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
+    private List<ChatRoomParticipant> participants = new ArrayList<>();
 
 }

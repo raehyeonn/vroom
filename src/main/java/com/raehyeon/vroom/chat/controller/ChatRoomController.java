@@ -1,12 +1,15 @@
 package com.raehyeon.vroom.chat.controller;
 
+import com.raehyeon.vroom.chat.dto.ChatRoomEntryResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomByCodeResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
+import com.raehyeon.vroom.chat.dto.GetMyChatRoomListResponse;
 import com.raehyeon.vroom.chat.dto.VerifyChatRoomPasswordRequest;
 import com.raehyeon.vroom.chat.service.ChatRoomService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,14 +47,24 @@ public class ChatRoomController {
         return chatRoomService.getByCode(chatRoomCode);
     }
 
+    @PostMapping("/{chatRoomId}/enter-with-password")
+    public ChatRoomEntryResponse enterWithPassword(@PathVariable Long chatRoomId, @RequestBody VerifyChatRoomPasswordRequest verifyChatRoomPasswordRequest, Principal principal) {
+        return chatRoomService.enterWithPasswordChatRoom(chatRoomId, verifyChatRoomPasswordRequest, principal);
+    }
+
     @PostMapping("/{chatRoomId}/enter")
-    public boolean enter(@PathVariable Long chatRoomId, @RequestBody VerifyChatRoomPasswordRequest verifyChatRoomPasswordRequest) {
-        return chatRoomService.enterChatRoom(chatRoomId, verifyChatRoomPasswordRequest);
+    public ChatRoomEntryResponse enter(@PathVariable Long chatRoomId, Principal principal) {
+        return chatRoomService.enterChatRoom(chatRoomId, principal);
     }
 
     @GetMapping("/{chatRoomId}/passwordRequired")
     public boolean passwordRequired(@PathVariable Long chatRoomId) {
         return chatRoomService.passwordRequired(chatRoomId);
+    }
+
+    @GetMapping("/me")
+    public Page<GetMyChatRoomListResponse> getMy(Principal principal, Pageable pageable) {
+        return chatRoomService.getMy(principal, pageable);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.raehyeon.vroom.member.domain;
 
+import com.raehyeon.vroom.chat.domain.ChatRoomParticipant;
 import com.raehyeon.vroom.role.domain.MemberRole;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -50,5 +52,8 @@ public class Member {
     public void changeNickname(String newNickname) {
         this.nickname = newNickname;
     }
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<ChatRoomParticipant> chatRoomParticipants = new ArrayList<>();
 
 }

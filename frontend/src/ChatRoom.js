@@ -69,8 +69,7 @@ const ChatRoom = () => {
                 if (isRequired) {
                     setPasswordModalOpen(true); // ✅ 모달 열기
                 } else {
-                    setPasswordVerified(true); // ✅ 바로 인증된 상태로 연결
-                    connectWebSocket();         // ✅ 연결 시작
+                    enterWithoutPassword();
                 }
             } catch (err) {
                 console.error('비밀번호 필요 여부 확인 실패:', err);
@@ -102,13 +101,39 @@ const ChatRoom = () => {
         fetchChatRoomName();
     }, [chatRoomId]);
 
+    const enterWithoutPassword = async () => {
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
+
+        try {
+            const enterRes = await fetch(`http://localhost:8080/api/chat-rooms/${chatRoomId}/enter`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                credentials: 'include'
+            });
+
+            const data = await enterRes.json();
+
+            if (data.result) {
+                setPasswordVerified(true);
+                connectWebSocket(); // ✅ 인증 성공 후 웹소켓 연결
+            } else {
+                console.error("입장 실패: 서버에서 false 반환");
+            }
+        } catch (e) {
+            console.error("비밀번호 없는 채팅방 입장 실패:", e);
+        }
+    };
+
     // ✅ 비밀번호 검증 시
     const verifyPasswordAndEnter = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) return;
 
         try {
-            const res = await fetch(`http://localhost:8080/api/chat-rooms/${chatRoomId}/enter`, {
+            const res = await fetch(`http://localhost:8080/api/chat-rooms/${chatRoomId}/enter-with-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -118,8 +143,8 @@ const ChatRoom = () => {
                 body: JSON.stringify({ password: passwordInput }),
             });
 
-            const isVerified = await res.json();
-            if (isVerified) {
+            const data = await res.json();
+            if (data.result) {
                 setPasswordModalOpen(false);
                 setPasswordVerified(true);
                 connectWebSocket(); // ✅ 인증 후 WebSocket 연결
