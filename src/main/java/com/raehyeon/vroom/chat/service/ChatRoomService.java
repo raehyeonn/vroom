@@ -4,6 +4,8 @@ import com.raehyeon.vroom.chat.converter.ChatRoomDtoConverter;
 import com.raehyeon.vroom.chat.converter.ChatRoomEntityConverter;
 import com.raehyeon.vroom.chat.domain.ChatRoom;
 import com.raehyeon.vroom.chat.domain.ChatRoomParticipant;
+import com.raehyeon.vroom.chat.dto.ChangeRoomNameRequest;
+import com.raehyeon.vroom.chat.dto.ChangeRoomNameResponse;
 import com.raehyeon.vroom.chat.dto.ChatRoomEntryResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
@@ -26,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +44,7 @@ public class ChatRoomService {
     private final ChatRoomEntityConverter chatRoomEntityConverter;
     private final MemberRepository memberRepository;
     private final ChatRoomParticipantRepository chatRoomParticipantRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public Page<GetAllChatRoomsResponse> getAllChatRooms(Pageable pageable) {
         Page<ChatRoom> page = chatRoomRepository.findByHiddenFalse(pageable);
@@ -135,6 +139,15 @@ public class ChatRoomService {
         Page<ChatRoomParticipant> participantPage = chatRoomParticipantRepository.findAllByMember(member, pageable);
 
         return participantPage.map(chatRoomDtoConverter::toGetMyChatRoomListResponse);
+    }
+
+    @Transactional
+    public void changeRoomName(Long chatRoomId, ChangeRoomNameRequest changeRoomNameRequest) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        chatRoom.changeName(changeRoomNameRequest.getRoomName());
+
+        ChangeRoomNameResponse changeRoomNameResponse = chatRoomDtoConverter.toChangeRoomNameResponse(chatRoom);
+        simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/info", changeRoomNameResponse);
     }
 
 }

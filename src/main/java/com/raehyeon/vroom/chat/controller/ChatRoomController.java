@@ -1,5 +1,6 @@
 package com.raehyeon.vroom.chat.controller;
 
+import com.raehyeon.vroom.chat.dto.ChangeRoomNameRequest;
 import com.raehyeon.vroom.chat.dto.ChatRoomEntryResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
@@ -65,6 +66,11 @@ public class ChatRoomController {
     @GetMapping("/me")
     public Page<GetMyChatRoomListResponse> getMy(Principal principal, Pageable pageable) {
         return chatRoomService.getMy(principal, pageable);
+    }
+
+    @PostMapping("/{chatRoomId}/change-name")
+    public void changeRoomName(@PathVariable Long chatRoomId, @RequestBody ChangeRoomNameRequest changeRoomNameRequest) {
+        chatRoomService.changeRoomName(chatRoomId, changeRoomNameRequest);
     }
 
 }

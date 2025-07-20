@@ -2,6 +2,7 @@ package com.raehyeon.vroom.chat.converter;
 
 import com.raehyeon.vroom.chat.domain.ChatRoom;
 import com.raehyeon.vroom.chat.domain.ChatRoomParticipant;
+import com.raehyeon.vroom.chat.dto.ChangeRoomNameResponse;
 import com.raehyeon.vroom.chat.dto.ChatRoomEntryResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
@@ -56,6 +57,12 @@ public class ChatRoomDtoConverter {
             .id(chatRoom.getId())
             .name(chatRoom.getName())
             .passwordRequired(chatRoom.isPasswordRequired())
+            .build();
+    }
+
+    public ChangeRoomNameResponse toChangeRoomNameResponse(ChatRoom chatRoom) {
+        return ChangeRoomNameResponse.builder()
+            .roomName(chatRoom.getName())
             .build();
     }
 

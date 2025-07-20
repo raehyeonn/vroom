@@ -5,6 +5,7 @@ import ChatRoomList from './ChatRoomList';  // ChatRoomList 컴포넌트를 임�
 import ChatRoom from './ChatRoom';
 import Login from './Login';
 import Join from './Join';
+import PrivateRoute from "./PrivateRoute";
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
           <div className="body">
               <Routes>
                   <Route path="/" element={<ChatRoomList />} />
-                  <Route path="/chats/:chatRoomId" element={<ChatRoom />} />
+                  <Route path="/chats/:chatRoomId" element={<PrivateRoute><ChatRoom /></PrivateRoute>} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/join" element={<Join />} />
               </Routes>

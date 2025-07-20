@@ -52,4 +52,8 @@ public class ChatRoom {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     private List<ChatRoomParticipant> participants = new ArrayList<>();
 
+    public void changeName(String newName) {
+        this.name = newName;
+    }
+
 }

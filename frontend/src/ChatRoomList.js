@@ -71,6 +71,7 @@ const ChatRoomList = () => {
 
                     response = await axios.get('http://localhost:8080/api/chat-rooms/me', {
                         headers: { Authorization: `Bearer ${token}` },
+                        withCredentials: true,
                         params: { page: currentPage, size: 10, sort: 'enteredAt,desc' },
                     });
                 } else {

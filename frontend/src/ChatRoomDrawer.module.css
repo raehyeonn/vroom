@@ -1,0 +1,86 @@
+.drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 350px;
+    height: 100vh;
+    background-color: #ffffff;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.closeButton {
+    align-self: flex-end;
+    padding: 6px 12px;
+    font-size: 14px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: #333;
+}
+
+.closeButton:hover {
+    text-decoration: underline;
+}
+
+.drawerButton {
+    padding: 10px 14px;
+    font-size: 14px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s ease;
+    width: 100%;
+}
+
+.drawerButton:hover {
+    background-color: #e0e0e0;
+}
+
+.backButton {
+    align-self: flex-start;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #555;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.backButton::before {
+    content: '←';
+    margin-right: 6px;
+    font-weight: bold;
+}
+
+.backButton:hover {
+    text-decoration: underline;
+}
+
+.heading {
+    margin-top: 0;
+    font-size: 16px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 6px;
+}
