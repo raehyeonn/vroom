@@ -1,7 +1,30 @@
+import { useNavigate } from "react-router-dom";
+import axios from 'axios'
 import styles from './ChatRoomDrawer.module.css';
 import ChangeRoomNameModal from './ChangeRoomNameModal';
 
-const ChatRoomDrawer = ({isDrawerOpen, setIsDrawerOpen, drawerView, setDrawerView, newRoomName, setNewRoomName, changeRoomName}) => {
+const ChatRoomDrawer = ({chatRoomId, isDrawerOpen, setIsDrawerOpen, drawerView, setDrawerView, newRoomName, setNewRoomName, changeRoomName}) => {
+    const navigate = useNavigate();
+
+    const handleExitChatRoom = async () => {
+        const accessToken = localStorage.getItem('accessToken');
+
+        try {
+            await axios.post(`http://localhost:8080/api/chat-rooms/${chatRoomId}/exit`, {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`
+                    },
+                    withCredentials: true
+                });
+
+            alert("채팅방을 나갔습니다.");
+            navigate('/');
+        } catch (error) {
+            alert('오류 발생');
+        }
+    }
+
     if(!isDrawerOpen) {
         return null;
     }
@@ -14,7 +37,7 @@ const ChatRoomDrawer = ({isDrawerOpen, setIsDrawerOpen, drawerView, setDrawerVie
                 <div>
                     <button className={styles.drawerButton} onClick={() => setDrawerView('rename')}>방 이름 변경</button>
                     <button className={styles.drawerButton} onClick={() => setDrawerView('participants')}>참여자 보기</button>
-                    <button className={styles.drawerButton} onClick={() => alert('채팅방 나가기 처리 예정')}>채팅방 나가기</button>
+                    <button className={styles.drawerButton} onClick={() => handleExitChatRoom()}>채팅방 나가기</button>
                 </div>
             )}
 

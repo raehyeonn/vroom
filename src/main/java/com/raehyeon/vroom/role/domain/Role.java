@@ -1,5 +1,6 @@
 package com.raehyeon.vroom.role.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,6 +29,7 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private RoleType roleType;
 
     @OneToMany(mappedBy = "role")

@@ -11,5 +11,5 @@ public interface ChatRoomParticipantRepository extends JpaRepository<ChatRoomPar
 
     boolean existsByMemberAndChatRoom(Member member, ChatRoom chatRoom);
     Page<ChatRoomParticipant> findAllByMember(Member member, Pageable pageable);
-
+    ChatRoomParticipant findByMemberAndChatRoom(Member member, ChatRoom chatRoom);
 }

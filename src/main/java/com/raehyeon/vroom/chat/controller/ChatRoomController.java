@@ -73,4 +73,9 @@ public class ChatRoomController {
         chatRoomService.changeRoomName(chatRoomId, changeRoomNameRequest);
     }
 
+    @PostMapping("/{chatRoomId}/exit")
+    public void exit(Principal principal, @PathVariable Long chatRoomId) {
+        chatRoomService.exit(principal, chatRoomId);
+    }
+
 }

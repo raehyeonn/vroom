@@ -150,4 +150,13 @@ public class ChatRoomService {
         simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId + "/info", changeRoomNameResponse);
     }
 
+    @Transactional
+    public void exit(Principal principal, Long chatRoomId) {
+        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoomParticipant chatRoomParticipant = chatRoomParticipantRepository.findByMemberAndChatRoom(member, chatRoom);
+
+        chatRoomParticipantRepository.delete(chatRoomParticipant);
+    }
+
 }

@@ -474,6 +474,7 @@ const ChatRoom = () => {
             )}
 
             <ChatRoomDrawer
+                chatRoomId={chatRoomId}
                 isDrawerOpen={isDrawerOpen}
                 setIsDrawerOpen={setIsDrawerOpen}
                 drawerView={drawerView}

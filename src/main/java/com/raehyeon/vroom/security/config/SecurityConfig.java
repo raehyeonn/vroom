@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}/passwordRequired").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/me").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}/messages").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.POST, "/api/chat-rooms/{chatRoomId}/exit").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
 
                 .anyRequest().authenticated()
             );
