@@ -10,6 +10,7 @@ import com.raehyeon.vroom.chat.dto.ChatRoomEntryResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
+import com.raehyeon.vroom.chat.dto.GetAllParticipantsResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomByCodeResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
 import com.raehyeon.vroom.chat.dto.GetMyChatRoomListResponse;
@@ -157,6 +158,13 @@ public class ChatRoomService {
         ChatRoomParticipant chatRoomParticipant = chatRoomParticipantRepository.findByMemberAndChatRoom(member, chatRoom);
 
         chatRoomParticipantRepository.delete(chatRoomParticipant);
+    }
+
+    public Page<GetAllParticipantsResponse> getAllParticipants(Long chatRoomId, Pageable pageable) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+
+        Page<ChatRoomParticipant> page = chatRoomParticipantRepository.findAllByChatRoom(chatRoom, pageable);
+        return page.map(chatRoomDtoConverter::toGetAllParticipantsResponse);
     }
 
 }

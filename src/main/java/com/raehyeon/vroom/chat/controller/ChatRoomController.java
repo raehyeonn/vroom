@@ -5,6 +5,7 @@ import com.raehyeon.vroom.chat.dto.ChatRoomEntryResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
+import com.raehyeon.vroom.chat.dto.GetAllParticipantsResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomByCodeResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
 import com.raehyeon.vroom.chat.dto.GetMyChatRoomListResponse;
@@ -76,6 +77,11 @@ public class ChatRoomController {
     @PostMapping("/{chatRoomId}/exit")
     public void exit(Principal principal, @PathVariable Long chatRoomId) {
         chatRoomService.exit(principal, chatRoomId);
+    }
+
+    @GetMapping("/{chatRoomId}/participants")
+    public Page<GetAllParticipantsResponse> getAllParticipants(@PathVariable Long chatRoomId, Pageable pageable) {
+        return chatRoomService.getAllParticipants(chatRoomId, pageable);
     }
 
 }

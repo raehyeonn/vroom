@@ -6,9 +6,11 @@ import com.raehyeon.vroom.chat.dto.ChangeRoomNameResponse;
 import com.raehyeon.vroom.chat.dto.ChatRoomEntryResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.GetAllChatRoomsResponse;
+import com.raehyeon.vroom.chat.dto.GetAllParticipantsResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomByCodeResponse;
 import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
 import com.raehyeon.vroom.chat.dto.GetMyChatRoomListResponse;
+import com.raehyeon.vroom.member.domain.Member;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -63,6 +65,15 @@ public class ChatRoomDtoConverter {
     public ChangeRoomNameResponse toChangeRoomNameResponse(ChatRoom chatRoom) {
         return ChangeRoomNameResponse.builder()
             .roomName(chatRoom.getName())
+            .build();
+    }
+
+    public GetAllParticipantsResponse toGetAllParticipantsResponse(ChatRoomParticipant chatRoomParticipant) {
+        Member member = chatRoomParticipant.getMember();
+
+        return GetAllParticipantsResponse.builder()
+            .id(member.getId())
+            .nickname(member.getNickname())
             .build();
     }
 
