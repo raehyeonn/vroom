@@ -56,4 +56,12 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<ChatRoomParticipant> chatRoomParticipants = new ArrayList<>();
 
+    // 나를 팔로우 하는 사람들
+    @OneToMany(mappedBy = "following")
+    private List<Follow> followers = new ArrayList<>();
+
+    // 내가 팔로우 하는 사람들
+    @OneToMany(mappedBy = "follower")
+    private List<Follow> followings = new ArrayList<>();
+
 }

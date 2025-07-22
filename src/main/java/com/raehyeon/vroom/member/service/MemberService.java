@@ -6,6 +6,7 @@ import com.raehyeon.vroom.member.domain.Member;
 import com.raehyeon.vroom.member.dto.ChangeNicknameRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberResponse;
+import com.raehyeon.vroom.member.dto.GetMemberBySearchResponse;
 import com.raehyeon.vroom.member.dto.GetMyInfoResponse;
 import com.raehyeon.vroom.member.exception.DuplicateEmailException;
 import com.raehyeon.vroom.member.exception.DuplicateNicknameException;
@@ -74,6 +75,12 @@ public class MemberService {
         }
 
         member.changeNickname(nickname);
+    }
+
+    public GetMemberBySearchResponse searchMember(String nickname) {
+        Member member = memberRepository.findByNickname(nickname).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+
+        return memberDtoConverter.toGetMemberBySearchResponse(member);
     }
 
 }

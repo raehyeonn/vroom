@@ -2,6 +2,7 @@ package com.raehyeon.vroom.member.converter;
 
 import com.raehyeon.vroom.member.domain.Member;
 import com.raehyeon.vroom.member.dto.CreateMemberResponse;
+import com.raehyeon.vroom.member.dto.GetMemberBySearchResponse;
 import com.raehyeon.vroom.member.dto.GetMyInfoResponse;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,12 @@ public class MemberDtoConverter {
             .email(member.getEmail())
             .nickname(member.getNickname())
             .createdAt(member.getCreatedAt())
+            .build();
+    }
+
+    public GetMemberBySearchResponse toGetMemberBySearchResponse(Member member) {
+        return GetMemberBySearchResponse.builder()
+            .nickname(member.getNickname())
             .build();
     }
 
