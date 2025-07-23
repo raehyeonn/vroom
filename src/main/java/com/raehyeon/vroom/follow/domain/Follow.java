@@ -1,5 +1,6 @@
-package com.raehyeon.vroom.member.domain;
+package com.raehyeon.vroom.follow.domain;
 
+import com.raehyeon.vroom.member.domain.Member;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;

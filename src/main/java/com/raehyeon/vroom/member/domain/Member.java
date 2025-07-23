@@ -1,6 +1,7 @@
 package com.raehyeon.vroom.member.domain;
 
 import com.raehyeon.vroom.chat.domain.ChatRoomParticipant;
+import com.raehyeon.vroom.follow.domain.Follow;
 import com.raehyeon.vroom.role.domain.MemberRole;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,5 +65,32 @@ public class Member {
     // 내가 팔로우 하는 사람들
     @OneToMany(mappedBy = "follower")
     private List<Follow> followings = new ArrayList<>();
+
+    @Version
+    private Long version;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Long followerCount = 0L;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Long followingCount = 0L;
+
+    public void increaseFollowerCount() {
+        this.followerCount++;
+    }
+
+    public void decreaseFollowerCount() {
+        this.followerCount--;
+    }
+
+    public void increaseFollowingCount() {
+        this.followingCount++;
+    }
+
+    public void decreaseFollowingCount() {
+        this.followingCount--;
+    }
 
 }
