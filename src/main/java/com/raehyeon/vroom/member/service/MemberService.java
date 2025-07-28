@@ -17,6 +17,7 @@ import com.raehyeon.vroom.role.domain.Role;
 import com.raehyeon.vroom.role.domain.RoleType;
 import com.raehyeon.vroom.role.repository.MemberRoleRepository;
 import com.raehyeon.vroom.role.repository.RoleRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,11 +38,11 @@ public class MemberService {
     @Transactional
     public CreateMemberResponse createMember(CreateMemberRequest createMemberRequest) {
         if(memberRepository.existsByEmail(createMemberRequest.getEmail())) {
-            throw new DuplicateEmailException("이미 사용 중인 이메일입니다.");
+            throw new DuplicateEmailException();
         }
 
         if(memberRepository.existsByNickname(createMemberRequest.getNickname())) {
-            throw new DuplicateNicknameException("이미 사용 중인 닉네임입니다.");
+            throw new DuplicateNicknameException();
         }
 
         String encodedPassword = passwordEncoder.encode(createMemberRequest.getPassword());
@@ -60,27 +61,32 @@ public class MemberService {
     }
 
     public GetMyInfoResponse getMine(UserDetails userDetails) {
-        Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
 
         return memberDtoConverter.toGetMyInfoResponse(member);
     }
 
     @Transactional
     public void changeNickname(UserDetails userDetails, ChangeNicknameRequest changeNicknameRequest) {
-        Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
         String nickname = changeNicknameRequest.getNickname();
 
         if(memberRepository.existsByNickname(nickname)) {
-            throw new DuplicateNicknameException("이미 사용 중인 닉네임입니다.");
+            throw new DuplicateNicknameException();
         }
 
         member.changeNickname(nickname);
     }
 
     public GetMemberBySearchResponse searchMember(String nickname) {
-        Member member = memberRepository.findByNickname(nickname).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Optional<Member> member = memberRepository.findByNickname(nickname);
 
-        return memberDtoConverter.toGetMemberBySearchResponse(member);
+        if(member.isPresent()) {
+            return memberDtoConverter.toGetMemberBySearchResponse(member.get());
+        } else {
+            return null;
+        }
+
     }
 
 }

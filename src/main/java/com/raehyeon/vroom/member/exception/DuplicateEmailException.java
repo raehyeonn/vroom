@@ -1,9 +1,12 @@
 package com.raehyeon.vroom.member.exception;
 
-public class DuplicateEmailException extends RuntimeException {
+import com.raehyeon.vroom.exception.BaseException;
+import org.springframework.http.HttpStatus;
 
-    public DuplicateEmailException(String message) {
-        super(message);
+public class DuplicateEmailException extends BaseException {
+
+    public DuplicateEmailException() {
+        super("이미 사용 중인 이메일입니다.", HttpStatus.CONFLICT);
     }
 
 }

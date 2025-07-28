@@ -4,6 +4,7 @@ import axios from 'axios';
 import styles from './ChatRoomList.module.css';
 import { jwtDecode } from 'jwt-decode';
 import CreateChatRoomModal from './CreateChatRoomModal';
+import AddFriendModal from './AddFriendModal';
 
 const ChatRoomList = () => {
     const [chatRooms, setChatRooms] = useState([]); // 채팅방 목록을 저장할 상태 변수, 초기값은 빈 배열
@@ -16,6 +17,9 @@ const ChatRoomList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열기/닫기 상태 관리
     const [searchCode, setSearchCode] = useState('');
     const [activeTab, setActiveTab] = useState('all'); // 채팅방 목록 탭 관리
+
+    const [userInfo, setUserInfo] = useState(null);
+    const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -98,6 +102,28 @@ const ChatRoomList = () => {
     useEffect(() => {
         setCurrentPage(0);
     }, [activeTab]);
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return;
+
+            try {
+                const response = await axios.get('http://localhost:8080/api/members/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    withCredentials: true
+                });
+
+                setUserInfo(response.data);
+            } catch (err) {
+                console.error('사용자 정보 조회 실패:', err);
+            }
+        };
+
+        fetchUserInfo();
+    }, []);
 
     const handlePageChange = (pageIndex) => {
         setCurrentPage(pageIndex);
@@ -201,11 +227,44 @@ const ChatRoomList = () => {
             </div>
 
             <div className={styles.pageBody}>
+                {userInfo && (
+                    <div>
+                        <div className={styles.addButtons}>
+                            <img
+                                className={styles.addFriends}
+                                alt="친구추가"
+                                src="/add_friend_icon.png"
+                                onClick={() => setIsAddFriendModalOpen(true)}
+                            />
+                            <img
+                                className={styles.addChatRooms}
+                                alt="채팅방추가"
+                                src="/add_chat_icon.png"
+                            />
+                        </div>
+
+                        <div className={styles.profile}>
+                            <p className={styles.nickname}>{userInfo.nickname}</p>
+                            <div className={styles.followWrap}>
+                                <div className={styles.follower}>
+                                    <p>팔로워</p>
+                                    <p className={styles.count}>{userInfo.followerCount}</p>
+                                </div>
+                                <div className={styles.following}>
+                                    <p>팔로잉</p>
+                                    <p className={styles.count}>{userInfo.followingCount}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className={styles.chatRoomListSection}>
                     <input type="text"
                            placeholder="코드를 입력하세요"
                            value={searchCode}
-                           onChange={(e) => setSearchCode(e.target.value)}></input>
+                           onChange={(e) => setSearchCode(
+                               e.target.value)}></input>
                     <button onClick={handleSearch}>검색</button>
 
                     <div className={styles.chatRoomListTop}>
@@ -262,6 +321,11 @@ const ChatRoomList = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)} // 모달 닫기
                 onCreate={handleCreateRoom} // 방 생성 함수
+            />
+
+            <AddFriendModal
+                isOpen={isAddFriendModalOpen}
+                onClose={() => setIsAddFriendModalOpen(false)}
             />
 
         </div>

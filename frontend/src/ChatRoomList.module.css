@@ -32,6 +32,10 @@
   font-weight: bold;
 }
 
+.pageBody {
+  width: 500px;
+}
+
 .logoutButton {
   border: 1px solid #000000;
   background-color: #FFFFFF;
@@ -62,6 +66,54 @@
   color: #FFFFFF;
 
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.addButtons {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+
+  padding-bottom: 10px;
+
+  gap: 10px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+
+  padding: 20px;
+
+  height: 70px;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.nickname {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.count {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.followWrap {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.follower, .following {
+  text-align: right;
+}
+
+.addFriends, .addChatRooms {
+  height: 20px;
+  width: 20px;
 }
 
 .chatRoomListTop {

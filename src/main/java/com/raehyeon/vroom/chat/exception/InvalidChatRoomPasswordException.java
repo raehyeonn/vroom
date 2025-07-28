@@ -1,9 +1,12 @@
 package com.raehyeon.vroom.chat.exception;
 
-public class InvalidChatRoomPasswordException extends RuntimeException {
+import com.raehyeon.vroom.exception.BaseException;
+import org.springframework.http.HttpStatus;
 
-    public InvalidChatRoomPasswordException(String message) {
-        super(message);
+public class InvalidChatRoomPasswordException extends BaseException {
+
+    public InvalidChatRoomPasswordException() {
+        super("비밀번호가 일치하지않습니다.", HttpStatus.UNAUTHORIZED);
     }
 
 }

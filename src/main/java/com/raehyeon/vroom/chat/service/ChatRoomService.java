@@ -62,7 +62,7 @@ public class ChatRoomService {
             String rawPassword = createChatRoomRequest.getPassword();
 
             if(rawPassword == null || rawPassword.isBlank()) {
-                throw new ChatRoomPasswordRequiredException("채팅방 비밀번호가 필요합니다.");
+                throw new ChatRoomPasswordRequiredException();
             }
 
             encodedPassword = passwordEncoder.encode(rawPassword);
@@ -75,28 +75,28 @@ public class ChatRoomService {
     }
 
     public GetChatRoomDetailResponse getById(Long chatRoomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
 
         return chatRoomDtoConverter.toGetChatRoomDetailResponse(chatRoom);
     }
 
     public GetChatRoomByCodeResponse getByCode(String chatRoomCode) {
-        ChatRoom chatRoom = chatRoomRepository.findByCode(chatRoomCode).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findByCode(chatRoomCode).orElseThrow(ChatRoomNotFoundException::new);
 
         return chatRoomDtoConverter.toGetChatRoomByCodeResponse(chatRoom);
     }
 
     @Transactional
     public ChatRoomEntryResponse enterWithPasswordChatRoom(Long chatRoomId, VerifyChatRoomPasswordRequest verifyChatRoomPasswordRequest, Principal principal) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
 
         if(chatRoom.isPasswordRequired()) {
             if(!passwordEncoder.matches(verifyChatRoomPasswordRequest.getPassword(), chatRoom.getPassword())) {
-                throw new InvalidChatRoomPasswordException("비밀번호가 일치하지않습니다.");
+                throw new InvalidChatRoomPasswordException();
             }
         }
 
-        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(MemberNotFoundException::new);
         boolean exists = chatRoomParticipantRepository.existsByMemberAndChatRoom(member, chatRoom);
 
         if(!exists) {
@@ -113,8 +113,8 @@ public class ChatRoomService {
 
     @Transactional
     public ChatRoomEntryResponse enterChatRoom(Long chatRoomId, Principal principal) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
-        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
+        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(MemberNotFoundException::new);
         boolean exists = chatRoomParticipantRepository.existsByMemberAndChatRoom(member, chatRoom);
 
         if(!exists) {
@@ -130,13 +130,13 @@ public class ChatRoomService {
     }
 
     public boolean passwordRequired(Long chatRoomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
 
         return chatRoom.isPasswordRequired();
     }
 
     public Page<GetMyChatRoomListResponse> getMy(Principal principal, Pageable pageable) {
-        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(MemberNotFoundException::new);
         Page<ChatRoomParticipant> participantPage = chatRoomParticipantRepository.findAllByMember(member, pageable);
 
         return participantPage.map(chatRoomDtoConverter::toGetMyChatRoomListResponse);
@@ -144,7 +144,7 @@ public class ChatRoomService {
 
     @Transactional
     public void changeRoomName(Long chatRoomId, ChangeRoomNameRequest changeRoomNameRequest) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
         chatRoom.changeName(changeRoomNameRequest.getRoomName());
 
         ChangeRoomNameResponse changeRoomNameResponse = chatRoomDtoConverter.toChangeRoomNameResponse(chatRoom);
@@ -153,15 +153,15 @@ public class ChatRoomService {
 
     @Transactional
     public void exit(Principal principal, Long chatRoomId) {
-        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        Member member = memberRepository.findByEmail(principal.getName()).orElseThrow(MemberNotFoundException::new);
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
         ChatRoomParticipant chatRoomParticipant = chatRoomParticipantRepository.findByMemberAndChatRoom(member, chatRoom);
 
         chatRoomParticipantRepository.delete(chatRoomParticipant);
     }
 
     public Page<GetAllParticipantsResponse> getAllParticipants(Long chatRoomId, Pageable pageable) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
 
         Page<ChatRoomParticipant> page = chatRoomParticipantRepository.findAllByChatRoom(chatRoom, pageable);
         return page.map(chatRoomDtoConverter::toGetAllParticipantsResponse);

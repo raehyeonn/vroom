@@ -37,10 +37,10 @@ public class ChatMessageService {
 
     @Transactional
     public void createMessage(Long chatRoomId, Principal principal, SendChatMessageRequest sendChatMessageRequest) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
 
         String email = principal.getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Member member = memberRepository.findByEmail(email).orElseThrow(MemberNotFoundException::new);
 
         ChatMessage chatMessage = chatMessageEntityConverter.toEntity(chatRoom, member, sendChatMessageRequest);
         chatMessageRepository.save(chatMessage);
@@ -51,7 +51,7 @@ public class ChatMessageService {
 
 
     public GetPastChatMessagesResponse getMessages(Long chatRoomId, ZonedDateTime cursor) {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(() -> new ChatRoomNotFoundException("존재하지 않거나 삭제된 채팅방입니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);
 
         Pageable limit = PageRequest.of(0, 21);
 

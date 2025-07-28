@@ -36,7 +36,7 @@ public class AuthService {
 
             return authenticationManager.authenticate(credentialsToken);
         } catch (BadCredentialsException e) {
-            throw new InvalidCredentialsException("아이디 또는 비밀번호가 일치하지 않습니다.");
+            throw new InvalidCredentialsException();
         }
     }
 

@@ -24,11 +24,11 @@ public class FollowService {
 
     @Transactional
     public void follow(UserDetails userDetails, FollowRequest followRequest) {
-        Member me = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
-        Member member = memberRepository.findByNickname(followRequest.getNickname()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Member me = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
+        Member member = memberRepository.findByNickname(followRequest.getNickname()).orElseThrow(MemberNotFoundException::new);
 
         if(followRepository.existsByFollowerAndFollowing(me, member)) {
-            throw new AlreadyFollowingException("이미 팔로우한 사용자입니다.");
+            throw new AlreadyFollowingException();
         }
 
         Follow follow = Follow.builder()
@@ -44,10 +44,10 @@ public class FollowService {
 
     @Transactional
     public void unfollow(UserDetails userDetails, UnfollowRequest unfollowRequest) {
-        Member me = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
-        Member member = memberRepository.findByNickname(unfollowRequest.getNickname()).orElseThrow(() -> new MemberNotFoundException("존재하지 않거나 탈퇴한 사용자입니다."));
+        Member me = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
+        Member member = memberRepository.findByNickname(unfollowRequest.getNickname()).orElseThrow(MemberNotFoundException::new);
 
-        Follow follow = followRepository.findByFollowerAndFollowing(me, member).orElseThrow(() -> new FollowNotFoundException("팔로우 관계가 존재하지 않습니다."));
+        Follow follow = followRepository.findByFollowerAndFollowing(me, member).orElseThrow(FollowNotFoundException::new);
         followRepository.delete(follow);
 
         me.decreaseFollowingCount();

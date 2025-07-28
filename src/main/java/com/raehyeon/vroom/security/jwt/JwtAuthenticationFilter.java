@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final List<String> PUBLIC_PATHS = Arrays.asList("/api/auth/login");
 
     @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest httpServletRequest, @NonNull HttpServletResponse httpServletResponse, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String accessToken = jwtUtil.extractTokenFromRequestHeader(httpServletRequest);
         String refreshToken = cookieService.extractTokenFromCookie(httpServletRequest, "refresh_token");
 
@@ -40,23 +41,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 인증 토큰이 존재하는 경우
         if(accessToken != null) {
             try {
+                log.info("[필터] accessToken 존재 → 인증 시도");
                 authentication = jwtAuthenticationService.authenticateWithAccessToken(accessToken, httpServletRequest);
+                log.info("[필터] accessToken 인증 성공: {}", authentication != null);
             } catch (ExpiredJwtException e) {
+                log.warn("[필터] accessToken 만료됨");
                 accessToken = null;
+            } catch (Exception e) {
+                log.error("[필터] accessToken 인증 중 예외 발생: {}", e.getMessage());
             }
         }
 
         // 리프레시 토큰은 존재하지만 인증된 사용자 정보가 없는 경우. 즉, 인증 토큰 기간이 만료된 경우 여기로 넘어옴.
         if(authentication == null && refreshToken != null) {
+            log.info("[필터] accessToken 없음, refreshToken 사용해서 토큰 갱신 시도");
             authentication = jwtAuthenticationService.refreshAccessToken(refreshToken, httpServletRequest, httpServletResponse);
             accessToken = jwtUtil.extractTokenFromResponseHeader(httpServletResponse);
             tokenRefreshed = true;
+            log.info("[필터] 토큰 갱신 결과 authentication: {}", authentication != null);
         }
 
         if(authentication != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.info("Authenticated user: {}", authentication.getName());  // 인증된 사용자 이름
-            log.info("Authentication details: {}", authentication);
+            log.info("[필터] 인증된 사용자: {}", authentication.getName());
+            log.info("[필터] 권한 목록:");
+            authentication.getAuthorities().forEach(auth -> log.info(" - {}", auth.getAuthority()));
 
             if(tokenRefreshed) {
                 httpServletRequest = new CustomHttpServletRequestWrapper(httpServletRequest);
@@ -65,6 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         } else {
+            log.warn("[필터] 인증 실패 - 401 반환");
             httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             httpServletResponse.getWriter().write("Authentication failed. Please log in again.");
         }
@@ -80,6 +90,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             || ("POST".equalsIgnoreCase(method) && path.equals("/api/auth/login"))
             || ("POST".equalsIgnoreCase(method) && path.equals("/api/members"))
             || ("GET".equalsIgnoreCase(method) && path.equals("/api/chat-rooms"));
+
         return shouldSkip;
     }
 }

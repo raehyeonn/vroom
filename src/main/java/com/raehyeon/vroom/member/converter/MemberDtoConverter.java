@@ -21,6 +21,8 @@ public class MemberDtoConverter {
         return GetMyInfoResponse.builder()
             .email(member.getEmail())
             .nickname(member.getNickname())
+            .followerCount(member.getFollowerCount())
+            .followingCount(member.getFollowingCount())
             .createdAt(member.getCreatedAt())
             .build();
     }

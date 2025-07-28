@@ -11,5 +11,7 @@ public class GetMyInfoResponse {
     private String email;
     private String nickname;
     private ZonedDateTime createdAt;
+    private long followerCount;
+    private long followingCount;
 
 }

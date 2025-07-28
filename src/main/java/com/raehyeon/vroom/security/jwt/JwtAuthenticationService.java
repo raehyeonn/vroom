@@ -1,7 +1,6 @@
 package com.raehyeon.vroom.security.jwt;
 
 import com.raehyeon.vroom.security.exception.TokenExpiredException;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ public class JwtAuthenticationService {
 
             return authentication;
         } else {
-            throw new TokenExpiredException("액세스 토큰이 만료되었습니다.");
+            throw new TokenExpiredException();
         }
     }
 
