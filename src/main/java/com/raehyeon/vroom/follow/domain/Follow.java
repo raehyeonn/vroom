@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -15,7 +16,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "follows")
+@Table(name = "follows", indexes = {
+    @Index(name = "index_follower_following", columnList = "follower_id, following_id"),
+    @Index(name = "index_following", columnList = "following_id")
+})
 @Getter
 @Builder
 @NoArgsConstructor

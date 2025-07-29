@@ -27,9 +27,10 @@ public class MemberDtoConverter {
             .build();
     }
 
-    public GetMemberBySearchResponse toGetMemberBySearchResponse(Member member) {
+    public GetMemberBySearchResponse toGetMemberBySearchResponse(Member member, boolean isFollowing) {
         return GetMemberBySearchResponse.builder()
             .nickname(member.getNickname())
+            .isFollowing(isFollowing)
             .build();
     }
 

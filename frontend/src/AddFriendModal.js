@@ -60,6 +60,28 @@ const AddFriendModal = ({isOpen, onClose}) => {
         }
     };
 
+    const handleFollow = async (nicknameToFollow) => {
+        const accessToken = localStorage.getItem('accessToken');
+
+        try {
+            await axios.post(`http://localhost:8080/api/follow`,
+                { nickname: nicknameToFollow },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                    withCredentials: true
+                });
+
+            setResult(prev => prev.map(
+                user => user.nickname === nicknameToFollow ? {...user, isFollowing: true} : user
+            ));
+        } catch (error) {
+            setErrorMessage('팔로우 중 오류가 발생했습니다.');
+        }
+
+    }
+
     const resetModal = () => {
         setNickname('');
         setResult(null);
@@ -110,9 +132,11 @@ const AddFriendModal = ({isOpen, onClose}) => {
                             {result.map((user, index) => (
                                 <li key={index} className={styles.resultItem}>
                                     <div className={styles.userInfo}>
-                                            <span className={styles.nickname}>
-                                                {user.nickname}
-                                            </span>
+                                        <span className={styles.nickname}>{user.nickname}</span>
+                                        {user.isFollowing
+                                            ? (<button className={styles.followingButton} disabled>팔로잉</button>)
+                                            : (<button className={styles.followButton} onClick={() => handleFollow(user.nickname)}>팔로우</button>)
+                                        }
 
                                     </div>
                                 </li>

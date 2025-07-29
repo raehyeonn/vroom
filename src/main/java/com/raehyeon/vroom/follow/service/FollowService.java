@@ -54,4 +54,7 @@ public class FollowService {
         member.decreaseFollowerCount();
     }
 
+    public boolean isFollowing(Member me, Member member) {
+        return followRepository.existsByFollowerAndFollowing(me, member);
+    }
 }

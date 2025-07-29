@@ -40,8 +40,8 @@ public class MemberController {
     }
 
     @GetMapping("/search")
-    public GetMemberBySearchResponse searchMember(@RequestParam String nickname) {
-        return memberService.searchMember(nickname);
+    public GetMemberBySearchResponse searchMember(@AuthenticationPrincipal UserDetails userDetails, @RequestParam String nickname) {
+        return memberService.searchMember(userDetails, nickname);
     }
 
 }
