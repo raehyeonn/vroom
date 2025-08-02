@@ -1,0 +1,94 @@
+.container {
+    width: 50%;
+    margin: 0 auto;
+}
+
+.tabButtons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.tabButton {
+    position: relative;
+    width: 50%;
+    padding: 20px 0;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #333;
+}
+
+.tabButton::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%; /* 원하는 밑줄 길이 */
+    height: 2px;
+    background-color: transparent;
+}
+
+.activeTab::after {
+    background-color: #000000;
+}
+
+.activeTab {
+    font-weight: bold;
+    color: #000000;
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+}
+
+.listItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* 닉네임 텍스트 */
+.listItem span {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* 버튼과 이미지 영역 공통 스타일 */
+.followButton,
+.unfollowButton,
+.removeFollower {
+    margin-left: 8px;
+}
+
+/* 버튼 스타일 (예시) */
+.followButton,
+.unfollowButton {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+.followButton:hover {
+    background-color: #d0f0d0;
+}
+
+.unfollowButton:hover {
+    background-color: #f0d0d0;
+}
+
+/* 삭제 이미지 스타일 */
+.removeFollower {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}

@@ -60,12 +60,12 @@ const AddFriendModal = ({isOpen, onClose}) => {
         }
     };
 
-    const handleFollow = async (nicknameToFollow) => {
+    const handleFollow = async (targetNickname) => {
         const accessToken = localStorage.getItem('accessToken');
 
         try {
-            await axios.post(`http://localhost:8080/api/follow`,
-                { nickname: nicknameToFollow },
+            await axios.post(`http://localhost:8080/api/members/${targetNickname}/follow`,
+                null,
                 {
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -74,7 +74,7 @@ const AddFriendModal = ({isOpen, onClose}) => {
                 });
 
             setResult(prev => prev.map(
-                user => user.nickname === nicknameToFollow ? {...user, isFollowing: true} : user
+                user => user.nickname === targetNickname ? {...user, isFollowing: true} : user
             ));
         } catch (error) {
             setErrorMessage('팔로우 중 오류가 발생했습니다.');

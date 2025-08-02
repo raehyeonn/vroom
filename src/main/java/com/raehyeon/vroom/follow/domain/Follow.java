@@ -32,10 +32,10 @@ public class Follow {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "follower_id", nullable = false)
-    private Member follower; // 나
+    private Member follower;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id", nullable = false)
-    private Member following; // 내가 팔로우하는 사람
+    private Member following;
 
 }

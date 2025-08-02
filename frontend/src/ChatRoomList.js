@@ -248,11 +248,11 @@ const ChatRoomList = () => {
                             <div className={styles.followWrap}>
                                 <div className={styles.follower}>
                                     <p>팔로워</p>
-                                    <p className={styles.count}>{userInfo.followerCount}</p>
+                                    <p className={styles.count} onClick={() => navigate('/follow?tab=followers')}>{userInfo.followerCount}</p>
                                 </div>
                                 <div className={styles.following}>
                                     <p>팔로잉</p>
-                                    <p className={styles.count}>{userInfo.followingCount}</p>
+                                    <p className={styles.count} onClick={() => navigate('/follow?tab=following')}>{userInfo.followingCount}</p>
                                 </div>
                             </div>
                         </div>

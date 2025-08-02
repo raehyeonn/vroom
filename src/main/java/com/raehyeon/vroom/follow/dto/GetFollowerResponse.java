@@ -5,8 +5,10 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class UnfollowRequest {
+public class GetFollowerResponse {
 
+    private long memberId;
     private String nickname;
+    private boolean isFollowedByMe;
 
 }

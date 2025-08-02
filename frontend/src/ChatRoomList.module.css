@@ -99,6 +99,7 @@
 .count {
   font-weight: bold;
   font-size: 20px;
+  cursor: pointer;
 }
 
 .followWrap {

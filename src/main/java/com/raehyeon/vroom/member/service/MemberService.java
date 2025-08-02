@@ -1,6 +1,6 @@
 package com.raehyeon.vroom.member.service;
 
-import com.raehyeon.vroom.follow.service.FollowService;
+import com.raehyeon.vroom.follow.repository.FollowRepository;
 import com.raehyeon.vroom.member.converter.MemberEntityConverter;
 import com.raehyeon.vroom.member.converter.MemberDtoConverter;
 import com.raehyeon.vroom.member.domain.Member;
@@ -35,7 +35,7 @@ public class MemberService {
     private final RoleRepository roleRepository;
     private final MemberEntityConverter memberEntityConverter;
     private final MemberDtoConverter memberDtoConverter;
-    private final FollowService followService;
+    private final FollowRepository followRepository;
 
     @Transactional
     public CreateMemberResponse createMember(CreateMemberRequest createMemberRequest) {
@@ -85,7 +85,7 @@ public class MemberService {
         Optional<Member> member = memberRepository.findByNickname(nickname);
 
         if(member.isPresent()) {
-            boolean isFollowing = followService.isFollowing(me, member.get());
+            boolean isFollowing = followRepository.existsByFollowerAndFollowing(me, member.get());
 
             return memberDtoConverter.toGetMemberBySearchResponse(member.get(), isFollowing);
         } else {

@@ -5,8 +5,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class FollowRequest {
+public class GetFollowingResponse {
 
+    private long memberId;
     private String nickname;
 
 }

@@ -6,6 +6,7 @@ import ChatRoom from './ChatRoom';
 import Login from './Login';
 import Join from './Join';
 import PrivateRoute from "./PrivateRoute";
+import FollowerList from "./FollowerList";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
                   <Route path="/chats/:chatRoomId" element={<PrivateRoute><ChatRoom /></PrivateRoute>} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/join" element={<Join />} />
+                  <Route path="/follow" element={<PrivateRoute><FollowerList /></PrivateRoute>} />
               </Routes>
           </div>
       </Router>
