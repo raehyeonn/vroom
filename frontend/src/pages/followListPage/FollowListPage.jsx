@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from "react-router-dom";
-import styles from './FollowerList.module.css';
+import styles from './FollowListPage.module.css';
 import {
     getFollowers,
     getFollowing,
     followMember as followMemberAPI,
     unfollowMember as unfollowMemberAPI,
     removeFollower as removeFollowerAPI
-} from "./api/followApi";
+} from "../../api/followApi";
 
-const FollowerList = () => {
+const FollowListPage = () => {
     const [searchParams,setSearchParams] = useSearchParams();
     const defaultTab = searchParams.get('tab') || 'followers';
 
@@ -58,14 +58,16 @@ const FollowerList = () => {
 
     const unfollowMember = async (targetNickname) => {
         try {
+            console.log('before unfollow, following:', following);
             await unfollowMemberAPI(targetNickname);
 
-            setFollowing((prevFollowing) => prevFollowing.filter(member => member.nickname !== targetNickname));
-
-            setFollowers((prev) => prev.map(member => member.nickname === targetNickname
+            setFollowing((prev) => prev.filter(member => member.nickname !== targetNickname));
+            setFollowers((prev) => prev
+                ? prev.map(member => member.nickname === targetNickname
                     ? {...member, followedByMe: false}
                     : member
                 )
+                : prev
             );
         } catch (error) {
             console.error("언팔로우 실패:", error);
@@ -78,7 +80,10 @@ const FollowerList = () => {
             await removeFollowerAPI(targetNickname);
 
             setFollowers((prev) => prev.filter(member => member.nickname !== targetNickname));
-            setFollowing(prev => prev ? prev.filter(member => member.nickname !== targetNickname) : prev);
+            setFollowing((prev) => prev
+                ? prev.filter(member => member.nickname !== targetNickname)
+                : prev
+            );
         } catch (error) {
             console.error("팔로워 삭제 실패:", error);
             alert("팔로워 삭제에 실패했습니다. 다시 시도해 주세요.");
@@ -154,4 +159,4 @@ const FollowerList = () => {
     );
 };
 
-export default FollowerList;
+export default FollowListPage;
