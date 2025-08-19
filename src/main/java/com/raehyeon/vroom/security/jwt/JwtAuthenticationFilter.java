@@ -24,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CookieService cookieService;
     private final JwtAuthenticationService jwtAuthenticationService;
+    private final JwtBlacklistService jwtBlacklistService;
 
     private static final List<String> PUBLIC_PATHS = Arrays.asList("/api/auth/login");
 
@@ -40,6 +41,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 인증 토큰이 존재하는 경우
         if(accessToken != null) {
+            if(jwtBlacklistService.isBlacklisted(accessToken)) {
+                httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                httpServletResponse.getWriter().write("토큰이 블랙리스트에 등록되어 있습니다. 다시 로그인해주세요.");
+                return;
+            }
+
             try {
                 log.info("[필터] accessToken 존재 → 인증 시도");
                 authentication = jwtAuthenticationService.authenticateWithAccessToken(accessToken, httpServletRequest);

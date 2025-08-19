@@ -7,6 +7,8 @@ import com.raehyeon.vroom.auth.exception.InvalidCredentialsException;
 import com.raehyeon.vroom.member.domain.Member;
 import com.raehyeon.vroom.member.repository.MemberRepository;
 import com.raehyeon.vroom.security.jwt.CookieService;
+import com.raehyeon.vroom.security.jwt.JwtBlacklistService;
+import com.raehyeon.vroom.security.jwt.JwtUtil;
 import com.raehyeon.vroom.security.jwt.TokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +29,8 @@ public class AuthService {
     private final CookieService cookieService;
     private final AuthDtoConverter authDtoConverter;
     private final MemberRepository memberRepository;
+    private final JwtBlacklistService jwtBlacklistService;
+    private final JwtUtil jwtUtil;
 
     private Authentication authenticateWithCredentials(LoginRequest loginRequest) {
         try {
@@ -60,11 +64,15 @@ public class AuthService {
     }
 
     public void logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        // 클라이언트에서 보낸 refresh_token을 쿠키에서 추출
+        String accessToken = jwtUtil.extractTokenFromRequestHeader(httpServletRequest);
         String refreshToken = cookieService.extractTokenFromCookie(httpServletRequest, "refresh_token");
 
-        // refresh_token이 존재하면, 이를 삭제
+        if(accessToken != null) {
+            jwtBlacklistService.addToken(accessToken);
+        }
+
         if (refreshToken != null) {
+            jwtBlacklistService.addToken(refreshToken);
             cookieService.removeRefreshTokenCookie(httpServletResponse);
         }
 
@@ -73,7 +81,6 @@ public class AuthService {
         httpServletResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         httpServletResponse.setHeader("Pragma", "no-cache");
         httpServletResponse.setHeader("Expires", "0");
-
     }
 
 }

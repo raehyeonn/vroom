@@ -48,6 +48,9 @@ dependencies {
 
     // 랜덤 문자열
     implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+    // 레디스
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {

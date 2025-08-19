@@ -40,13 +40,18 @@ const MainPage = () => {
 
     const handleLogout = async () => {
         try {
+            const accessToken = localStorage.getItem('accessToken');
+
             localStorage.removeItem('accessToken');
             localStorage.removeItem('memberId');
 
             await axios.post(
                 'http://localhost:8080/api/auth/logout',
                 {},
-                { withCredentials: true }
+                {
+                    headers: {Authorization: `Bearer ${accessToken}`},
+                    withCredentials: true
+                }
             );
 
             alert('로그아웃 되었습니다.');
