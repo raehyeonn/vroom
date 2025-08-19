@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import styles from './ChatRoomList.module.css';
+import styles from './MainPage.module.css';
 import { jwtDecode } from 'jwt-decode';
-import CreateChatRoomModal from './CreateChatRoomModal';
-import AddFriendModal from './AddFriendModal';
+import CreateChatRoomModal from '../../CreateChatRoomModal';
+import AddFriendModal from '../../AddFriendModal';
+import SearchChatRoomModal from './SearchChatRoomModal';
 
-const ChatRoomList = () => {
+import {
+    createChatRoom,
+    getChatRoomByCode,
+    joinChatRoom
+} from "../../api/chatRoomApi";
+
+import { getChatRooms } from "../../api/chatRoomApi";
+import {getMyChatRooms} from "../../api/memberApi";
+
+const MainPage = () => {
     const [chatRooms, setChatRooms] = useState([]); // 채팅방 목록을 저장할 상태 변수, 초기값은 빈 배열
     const [loading, setLoading] = useState(true); // 데이터를 가져오는 동안 로딩 상태를 나타내는 변수, 초기값은 true(=데이터를 가져오는 동안 로딩 화면 표시)
     const [error, setError] = useState(null); // API 호출 시 오류 메세지를 저장하는 변수, 초기값은 null
@@ -15,11 +25,18 @@ const ChatRoomList = () => {
     const [currentPage, setCurrentPage] = useState(0); // 0부터 시작
     const [totalPages, setTotalPages] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열기/닫기 상태 관리
-    const [searchCode, setSearchCode] = useState('');
+    const [code, setCode] = useState('');
     const [activeTab, setActiveTab] = useState('all'); // 채팅방 목록 탭 관리
+
+    const [isPasswordInputModalOpen, setIsPasswordInputModal] = useState(false);
+    const [selectedChatRoom, setSelectedChatRoom] = useState(null);
+    const [passwordInput, setPasswordInput] = useState('');
+
 
     const [userInfo, setUserInfo] = useState(null);
     const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
@@ -58,35 +75,21 @@ const ChatRoomList = () => {
     }, []);
 
     useEffect(() => {
-        const fetchChatRoomsByPage = async () => {
+        const loadChatRooms = async () => {
             setLoading(true);
 
             try {
                 let response;
 
                 if (activeTab === 'my') {
-                    const token = localStorage.getItem('accessToken');
-
-                    if (!token) {
-                        alert('로그인이 필요합니다!');
-                        setLoading(false);
-                        return;
-                    }
-
-                    response = await axios.get('http://localhost:8080/api/chat-rooms/me', {
-                        headers: { Authorization: `Bearer ${token}` },
-                        withCredentials: true,
-                        params: { page: currentPage, size: 10, sort: 'enteredAt,desc' },
-                    });
+                    response = await getMyChatRooms(currentPage, 20, 'joinedAt,desc');
                 } else {
-                    response = await axios.get('http://localhost:8080/api/chat-rooms', {
-                        params: { page: currentPage, size: 10, sort: 'createdAt,desc' },
-                    });
+                    response = await getChatRooms(currentPage, 20, 'createdAt,desc');
                 }
 
-                const { content, totalPages } = response.data;
+                const { content, totalPages } = response;
 
-                setChatRooms(content.filter(room => room.name));
+                setChatRooms(content);
                 setTotalPages(totalPages);
             } catch (err) {
                 console.error('API 호출 에러:', err);
@@ -96,7 +99,9 @@ const ChatRoomList = () => {
             }
         };
 
-        fetchChatRoomsByPage();
+        loadChatRooms().catch(err => {
+            console.error('Unhandled error in loadChatRooms:', err);
+        });
     }, [activeTab, currentPage]);
 
     useEffect(() => {
@@ -129,80 +134,23 @@ const ChatRoomList = () => {
         setCurrentPage(pageIndex);
     };
 
-    const handleCreateRoom = async (roomData) => {
+    const handleCreateRoom = async (chatRoom) => {
         try {
-            // 로컬 스토리지에서 토큰 가져오기
-            const token = localStorage.getItem('accessToken');
+            const response = await createChatRoom(chatRoom);
 
-            if (!token) {
-                alert('로그인이 필요합니다!');
-                return;
-            }
-
-            // 헤더에 Authorization 토큰을 추가하여 API 호출
-            const response = await axios.post(
-                'http://localhost:8080/api/chat-rooms',
-                { name: roomData.name,
-                    hidden: roomData.hidden,
-                    passwordRequired: roomData.passwordRequired,
-                    password: roomData.password }, // 채팅방 이름
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`, // Authorization 헤더에 JWT 토큰 추가
-                    },
-                    withCredentials: true
-                }
-            );
-
-            // 성공적으로 생성되면 알림
-            alert(`${response.data.name} 채팅방이 생성되었습니다!`);
-            setIsModalOpen(false); // 모달 닫기
-
-            // 채팅방 목록을 갱신 (추가 요청 또는 새로고침)
+            alert(`${response.name} 채팅방이 생성되었습니다!`);
+            setIsModalOpen(false);
             setCurrentPage(0);
-        } catch (err) {
-            console.error('채팅방 생성 오류:', err);
+        } catch (error) {
+            console.error('채팅방 생성 오류:', error);
             alert('채팅방 생성 실패');
         }
     };
 
-    const handleSearch = async () => {
 
-        const token = localStorage.getItem('accessToken');
 
-        if (!token) {
-            alert('로그인이 필요합니다!');
-            return;
-        }
-
-        if (!searchCode) {
-            alert('코드를 입력해주세요!');
-            return;
-        }
-
-        try {
-            const response = await axios.get(
-                `http://localhost:8080/api/chat-rooms/by-code/${searchCode}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    withCredentials: true
-                }
-            );
-            const chatRoom = response.data;
-
-            setChatRooms([chatRoom]); // 배열로 덮어씌움
-            setTotalPages(1);         // 페이지네이션 숨기거나 고정
-            setCurrentPage(0);
-        } catch (err) {
-            console.error('채팅방 검색 오류:', err);
-            alert('해당 코드의 채팅방을 찾을 수 없습니다.');
-        }
-    };
-
-    const handleEnterRoom = (room) => {
-        window.open(`/chats/${room.id}`, '_blank');
+    const handleEnterRoom = (chatRoom) => {
+        window.open(`/chats/${chatRoom.id}`, '_blank');
     };
 
     // 로딩 중일 때 표시할 메시지
@@ -240,6 +188,13 @@ const ChatRoomList = () => {
                                 className={styles.addChatRooms}
                                 alt="채팅방추가"
                                 src="/add_chat_icon.png"
+                                onClick={() => setIsMember && setIsModalOpen(true)}
+                            />
+                            <img
+                                className={styles.searchChatRoom}
+                                alt="채팅방검색"
+                                src="/search.png"
+                                onClick={() => setIsSearchModalOpen(true)}
                             />
                         </div>
 
@@ -260,13 +215,6 @@ const ChatRoomList = () => {
                 )}
 
                 <div className={styles.chatRoomListSection}>
-                    <input type="text"
-                           placeholder="코드를 입력하세요"
-                           value={searchCode}
-                           onChange={(e) => setSearchCode(
-                               e.target.value)}></input>
-                    <button onClick={handleSearch}>검색</button>
-
                     <div className={styles.chatRoomListTop}>
                         <div className={styles.tabButtons}>
                             <button
@@ -284,18 +232,14 @@ const ChatRoomList = () => {
                                 나의 채팅방
                             </button>
                         </div>
-                        {isMember && (
-                            <button className={styles.createChatRoomButton}
-                                    onClick={() => setIsModalOpen(true)}>채팅방
-                                만들기</button>)}
                     </div>
 
                     <ul className={styles.chatRoomList}>
-                        {chatRooms.map((room, index) => (
-                            <li key={index} className={styles.chatRoom}>
-                                <p className={styles.chatRoomName}>{room.name}</p>
+                        {chatRooms.map((chatRoom, id) => (
+                            <li key={id} className={styles.chatRoom}>
+                                <p className={styles.chatRoomName}>{chatRoom.name}</p>
                                 <button className={styles.enterChatRoomButton}
-                                        onClick={() => handleEnterRoom(room)}>입장 >
+                                        onClick={() => handleEnterRoom(chatRoom)}>입장 >
                                 </button>
                             </li>
                         ))}
@@ -328,8 +272,13 @@ const ChatRoomList = () => {
                 onClose={() => setIsAddFriendModalOpen(false)}
             />
 
+            <SearchChatRoomModal
+                isOpen={isSearchModalOpen}
+                onClose={() => setIsSearchModalOpen(false)}
+            />
+
         </div>
     );
 };
 
-export default ChatRoomList;
+export default MainPage;

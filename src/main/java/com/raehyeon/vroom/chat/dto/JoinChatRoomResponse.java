@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ChatRoomEntryResponse {
+public class JoinChatRoomResponse {
 
-    boolean result;
+    boolean success;
 
 }

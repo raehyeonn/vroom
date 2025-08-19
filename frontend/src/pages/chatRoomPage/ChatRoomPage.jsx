@@ -2,23 +2,31 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Client } from '@stomp/stompjs';
-import styles from './ChatRoom.module.css';
-import VerifyChatRoomPasswordModal from './VerifyChatRoomPasswordModal';
-import ChangeRoomNameModal from './ChangeRoomNameModal';
-import ChatRoomDrawer from "./ChatRoomDrawer";
+import styles from './ChatRoomPage.module.css';
+import VerifyChatRoomPasswordModal from '../../VerifyChatRoomPasswordModal';
+import RenameChatRoomModal from './RenameChatRoomModal';
+import ChatRoomDrawer from "../../ChatRoomDrawer";
+import {
+    getChatRoomDetail,
+    getChatRoomPasswordRequired,
+    joinChatRoom, updateChatRoomName
+} from "../../api/chatRoomApi";
 
-const ChatRoom = () => {
+const ChatRoomPage = () => {
     const { chatRoomId } = useParams();
     const numericChatRoomId = Number(chatRoomId);
 
-    const [chatRoomName, setChatRoomName] = useState('');
+    const [isWebSocketConnected, setIsWebSocketConnected] = useState(false); // 웹소켓 연결 여부 -> 중복 연결 방지 및 웹소켓 연결 후 채팅 가져오기위해
+
+    const [name, setName] = useState('');
+    const [code, setCode] = useState('');
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState('');
 
     const [passwordRequired, setPasswordRequired] = useState(false); // 채팅방 입장 시 비밀번호 필요 여부를 나타내는 상태 변수(기본 값 = false)
-    const [passwordVerified, setPasswordVerified] = useState(false);
-    const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+    const [passwordInputModalOpen, setPasswordInputModalOpen] = useState(false);
     const [passwordInput, setPasswordInput] = useState('');
+    const [passwordVerified, setPasswordVerified] = useState(false);
 
     const [hasNext, setHasNext] = useState(true);
     const [nextCursor, setNextCursor] = useState(null);
@@ -29,16 +37,24 @@ const ChatRoom = () => {
     const messagesEndRef = useRef(null);
     const textAreaRef = useRef(null);
 
-    const [renameModalOpen, setRenameModalOpen] = useState(false);
-    const [newRoomName, setNewRoomName] = useState('');
+    const [isRenameChatRoomModalOpen, setIsRenameChatRoomModalOpen] = useState(false);
+    const [newName, setNewName] = useState('');
 
     const [isDrawerOpen, setIsDrawerOpen] = useState(false); // 서랍 열림 여부
     const [drawerView, setDrawerView] = useState('menu'); // 'menu' | 'participants' 등
 
     const [initialScrollDone, setInitialScrollDone] = useState(false);
-    const [webSocketConnected, setWebSocketConnected] = useState(false);
+
+    const subscriptionRef = useRef(null);
+    const infoSubscriptionRef = useRef(null);
+
 
     const connectWebSocket = useCallback(() => {
+        if (stompClient.current?.connected || isWebSocketConnected) {
+            console.log("🔁 이미 WebSocket에 연결되어 있음");
+            return;
+        }
+
         console.log("✅ WebSocket 연결 시도");
 
         // 브라우저 localStorage에서 로그인 토큰을 가져옴
@@ -62,34 +78,28 @@ const ChatRoom = () => {
                 console.log("✅ WebSocket 연결 성공");
 
                 console.log("✅ 채팅방 정보 가져오기 시도");
-                fetchChatRoomName();
+                fetchChatRoomDetail();
 
                 console.log("✅ 채팅방 지난 메시지 가져오기 시도");
                 fetchPastMessages();
 
-                setWebSocketConnected(true);
+                setIsWebSocketConnected(true);
 
-                client.subscribe(`/sub/${numericChatRoomId}`, (message) => {
-                    // 서버로부터 받은 JSON 문자열을 JavaScript 객체로 변환
-                    const parsedMessage = JSON.parse(message.body);
+                if (!subscriptionRef.current) {
+                    subscriptionRef.current = client.subscribe(`/sub/${numericChatRoomId}`, (message) => {
+                        const parsedMessage = JSON.parse(message.body);
+                        console.log('[WebSocket message received]', parsedMessage);
+                        setMessages((prev) => [...prev, parsedMessage]);
+                    });
+                }
 
-                    console.log('[WebSocket message received]', parsedMessage);
-
-                    /*
-                    setMessages 호출되면서 내부 함수가 실행되고,
-                    기존 messages 배열의 요소들을 복사해 새로운 messages 배열에 넣은 뒤
-                    마지막에 parsedMessage 를 추가하여 새로운 배열 생성 마무리
-                    */
-                    setMessages((prev) => [...prev, parsedMessage]);
-                });
-
-                client.subscribe(`/sub/${numericChatRoomId}/info`, (message) => {
-                    const parsedMessage = JSON.parse(message.body);
-
-                    console.log('[WebSocket message received]', parsedMessage);
-                    setChatRoomName(parsedMessage.roomName);
-
-                });
+                if (!infoSubscriptionRef.current) {
+                    infoSubscriptionRef.current = client.subscribe(`/sub/${numericChatRoomId}/info`, (message) => {
+                        const parsedMessage = JSON.parse(message.body);
+                        console.log('[WebSocket message received]', parsedMessage);
+                        setName(parsedMessage.name);
+                    });
+                }
             },
 
             onStompError: (frame) => {
@@ -105,41 +115,26 @@ const ChatRoom = () => {
     }, [numericChatRoomId]);
 
     const disconnectWebSocket = () => {
+        if (subscriptionRef.current) {
+            subscriptionRef.current.unsubscribe();
+            subscriptionRef.current = null;
+        }
+        if (infoSubscriptionRef.current) {
+            infoSubscriptionRef.current.unsubscribe();
+            infoSubscriptionRef.current = null;
+        }
         stompClient.current?.deactivate();
+        setIsWebSocketConnected(false);
     };
 
-    // 채팅방 입장 시 비밀번호 여부 확인
-    // 비밀번호 설정된 채팅방이라면 비밀번호 입력
     useEffect(() => {
-        console.log("🔁 첫번째 useEffect 진입", chatRoomId, connectWebSocket);
-        // 브라우저 localStorage에서 로그인 토큰을 가져옴
-        const accessToken = localStorage.getItem('accessToken');
-
-        // accessToken이 없는 경우
-        if (!accessToken) {
-            console.error("JWT 토큰이 없습니다."); // 콘솔에 에러 메시지 출력
-            alert("로그인이 필요한 기능입니다.");
-            // window.location.href = "/login";
-            return; // 웹소켓 연결 작업 중단
-        }
-
-        // 채팅방이 필요한지 확인하는 비동기 함수
         const checkPasswordRequired = async () => {
             try {
-                // axios.get은 비동기 함수이기 때문에 await 키워드를 붙여서 응답이 올 때까지 기다린다.
-                // await가 없으면 아래 isRequired에서 에러 또는 undefined가됨.
-                const response = await axios.get(`http://localhost:8080/api/chat-rooms/${chatRoomId}/passwordRequired`,{
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`
-                        },
-                        withCredentials: true
-                });
+                const response = await getChatRoomPasswordRequired(chatRoomId);
+                setPasswordRequired(response);
 
-                const isRequired = response.data;
-                setPasswordRequired(isRequired); // 상태 값을 isRequired 에 맞추어 변경, 채팅방 비밀번호 입력 모달을 띄우기 위한 조건으로 사용됨.
-
-                if (isRequired) {
-                    setPasswordModalOpen(true); // 채팅방 비밀번호 입력 모달 열기
+                if (response) {
+                    setPasswordInputModalOpen(true);
                 } else {
                     await enterWithoutPassword();
                 }
@@ -154,123 +149,68 @@ const ChatRoom = () => {
     }, [chatRoomId, connectWebSocket]);
 
     const enterWithoutPassword = async () => {
-        console.log('enterWithoutPassword 호출됨');
-
-        // 브라우저의 localStorage에서 accessToken이라는 이름으로 저장된 값을 가져온다.
-        const accessToken = localStorage.getItem('accessToken');
-
-        console.log('accessToken:', accessToken);
-
-        if (!accessToken) {
-            console.log('accessToken 없음, 함수 종료');
-            return;
-        }
-
-        console.log('axios 요청 시작');
         try {
-            const response = await axios.post(`http://localhost:8080/api/chat-rooms/${chatRoomId}/enter`,{}, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                withCredentials: true
-            });
+            const response = await joinChatRoom(chatRoomId);
 
-            const data = response.data;
-            console.log('axios 성공:', response.data);
-
-            if (data) {
+            if(response) {
                 setPasswordVerified(true);
                 connectWebSocket();
             } else {
-                console.error("입장 실패: 서버에서 false 반환");
+                alert("입장에 실패했습니다.");
             }
-        } catch (e) {
-            console.error("비밀번호 없는 채팅방 입장 실패:", e);
+        } catch (error) {
+            console.error(error);
+            alert("네트워크 오류입니다.");
         }
     };
 
-    // 비밀번호 검증 시
-    const verifyPasswordAndEnter = async () => {
-        console.log("✅ verifyPasswordAndEnter 시도");
-
-        const token = localStorage.getItem('accessToken');
-        if (!token) return;
-
+    const verifyPasswordAndEnter = async (password) => {
         try {
-            const res = await fetch(`http://localhost:8080/api/chat-rooms/${chatRoomId}/enter-with-password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                credentials: 'include',
-                body: JSON.stringify({ password: passwordInput }),
-            });
+            const response = await joinChatRoom(chatRoomId, password);
 
-            const data = await res.json();
-            if (data.result) {
-                setPasswordModalOpen(false);
+            if (response) {
                 setPasswordVerified(true);
-                console.log("✅ verifyPasswordAndEnter 성공");
-                connectWebSocket(); // ✅ 인증 후 WebSocket 연결
+                setPasswordInputModalOpen(false);
+                connectWebSocket();
             } else {
-                alert('비밀번호가 틀렸습니다.');
+                alert("입장에 실패했습니다.");
             }
-        } catch (err) {
-            console.error('비밀번호 검증 실패:', err);
+        } catch (error) {
+            console.error(error);
+            alert("네트워크 오류입니다.");
         }
     };
+
+
+
+
 
     // 채팅방 정보 가져오기
-    const fetchChatRoomName = async () => {
-        // 브라우저 localStorage에서 로그인 토큰을 가져옴
-        const accessToken = localStorage.getItem('accessToken');
-
-        // accessToken이 없는 경우
-        if (!accessToken) {
-            console.error("JWT 토큰이 없습니다."); // 콘솔에 에러 메시지 출력
-            return; // 웹소켓 연결 작업 중단
-        }
-
+    const fetchChatRoomDetail = async () => {
         try {
-            const response = await axios.get(`http://localhost:8080/api/chat-rooms/${chatRoomId}`, {
-                headers: { Authorization: `Bearer ${accessToken}` },
-                withCredentials: true
-            });
-            console.log("✅ 채팅방 정보 가져오기 성공");
-            setChatRoomName(response.data.roomName);
+            const response = await getChatRoomDetail(chatRoomId);
+            setCode(response.code);
+            setName(response.name);
         } catch (err) {
             console.error(err);
         }
     };
 
-    const changeRoomName = async (roomName) => {
-        const accessToken = localStorage.getItem('accessToken');
-        if (!accessToken) {
-            console.error("JWT 토큰이 없습니다.");
-            return;
-        }
+    const changeRoomName = async (newName) => {
 
-        if (!roomName.trim()) {
+        if (!newName.trim()) {
             alert("방 제목을 입력하세요.");
             return;
         }
 
         try {
-            const response = await axios.post(
-                `http://localhost:8080/api/chat-rooms/${chatRoomId}/change-name`,
-                { roomName: roomName }, // ✅ 서버 DTO 맞춤
-                {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                    withCredentials: true,
-                }
-            );
+            const response = await updateChatRoomName(chatRoomId, newName);
 
-            if (response.status === 200) {
+            if (response) {
                 alert("방 이름이 변경되었습니다.");
-                setChatRoomName(roomName); // ✅ UI 반영
-                setRenameModalOpen(false);
-                setNewRoomName(''); // 입력 초기화
+                setName(response) // ✅ UI 반영
+                setIsRenameChatRoomModalOpen(false);
+                setNewName('');
             }
         } catch (err) {
             console.error("방 이름 변경 실패:", err);
@@ -350,7 +290,7 @@ const ChatRoom = () => {
 
     // 위로 스크롤 하면 과거 채팅방 메시지 가져오기
     useEffect(() => {
-        if (!webSocketConnected) return;
+        if (!isWebSocketConnected) return;
 
         const chatBox = chatBoxRef.current; // chatBoxRef.current는 className={styles.chatBox}이거를 가르키고 있음
 
@@ -373,7 +313,7 @@ const ChatRoom = () => {
             // DOM 요소에 등록되었던 이벤트 제거
             chatBox.removeEventListener('scroll', handleScroll)
         };
-    }, [webSocketConnected, fetchScrollPastMessages]);
+    }, [isWebSocketConnected, fetchScrollPastMessages]);
 
     const currentMemberId = localStorage.getItem('memberId');
 
@@ -405,7 +345,7 @@ const ChatRoom = () => {
     if (passwordRequired && !passwordVerified) {
         return (
             <VerifyChatRoomPasswordModal
-                isOpen={passwordModalOpen}
+                isOpen={passwordInputModalOpen}
                 onClose={() => window.close()}
                 onConfirm={verifyPasswordAndEnter}
                 password={passwordInput}
@@ -418,7 +358,7 @@ const ChatRoom = () => {
         <div className={styles.chatContainer}>
             <header className={styles.chatRoomHeader}>
                 <a href="/">&lt;</a>
-                <span className={styles.chatRoomName}>{chatRoomName}</span>
+                <span className={styles.chatRoomName}>{name}</span>
                 <img
                     className={styles.infoImg}
                     alt="안내표"
@@ -463,13 +403,14 @@ const ChatRoom = () => {
                 <button onClick={sendMessage}>전송</button>
             </div>
 
-            {renameModalOpen && (
-                <ChangeRoomNameModal
-                    isOpen={renameModalOpen}
-                    onClose={() => setRenameModalOpen(false)}
-                    onConfirm={changeRoomName}
-                    value={newRoomName}
-                    onChange={setNewRoomName}
+            {isRenameChatRoomModalOpen && (
+                <RenameChatRoomModal
+                    isOpen={isRenameChatRoomModalOpen}
+                    value={newName} // 부모의 현재 상태값을 넘겨줌 (빈문자열)
+                    onChange={setNewName} // 자식에서 입력한 이름으로 변경
+                    onClose={() => setIsRenameChatRoomModalOpen(false)} // 모달에서 renameModalOpen 이걸 true -> false로 바꿀수있는 함수 전달
+                    onConfirm={changeRoomName} // 모달에서 확인 버튼을 누르면 changeRoomName함수 전달
+
                 />
             )}
 
@@ -479,12 +420,12 @@ const ChatRoom = () => {
                 setIsDrawerOpen={setIsDrawerOpen}
                 drawerView={drawerView}
                 setDrawerView={setDrawerView}
-                newRoomName={newRoomName}
-                setNewRoomName={setNewRoomName}
+                newRoomName={newName}
+                setNewRoomName={setNewName}
                 changeRoomName={changeRoomName}
             />
         </div>
     );
 };
 
-export default ChatRoom;
+export default ChatRoomPage;

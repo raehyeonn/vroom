@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import axios from 'axios'
 import styles from './ChatRoomDrawer.module.css';
-import ChangeRoomNameModal from './ChangeRoomNameModal';
+import RenameChatRoomModal from './pages/chatRoomPage/RenameChatRoomModal';
 import { useState } from "react";
 
 const ChatRoomDrawer = ({chatRoomId, isDrawerOpen, setIsDrawerOpen, drawerView, setDrawerView, newRoomName, setNewRoomName, changeRoomName}) => {
@@ -70,7 +70,7 @@ const ChatRoomDrawer = ({chatRoomId, isDrawerOpen, setIsDrawerOpen, drawerView, 
             {drawerView === 'rename' && (
                 <div>
                     <button className={styles.backButton} onClick={() => setDrawerView('menu')}>뒤로가기</button>
-                    <ChangeRoomNameModal
+                    <RenameChatRoomModal
                         isOpen={true}
                         onClose={() => setDrawerView('menu')}
                         onConfirm={changeRoomName}

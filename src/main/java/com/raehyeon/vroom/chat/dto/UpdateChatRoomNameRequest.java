@@ -5,10 +5,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class GetAllChatRoomsResponse {
+public class UpdateChatRoomNameRequest {
 
-    private long id;
     private String name;
-    private boolean passwordRequired;
 
 }

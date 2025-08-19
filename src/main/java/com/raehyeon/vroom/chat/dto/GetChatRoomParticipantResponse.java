@@ -5,8 +5,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class ChangeRoomNameResponse {
+public class GetChatRoomParticipantResponse {
 
-    private String roomName;
+    private Long id;
+    private String nickname;
 
 }

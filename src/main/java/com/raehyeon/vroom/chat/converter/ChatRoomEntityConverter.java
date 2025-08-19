@@ -9,8 +9,8 @@ public class ChatRoomEntityConverter {
 
     public ChatRoom toEntity(CreateChatRoomRequest createChatRoomRequest, String code, String encodedPassword) {
         return ChatRoom.builder()
-            .name(createChatRoomRequest.getName())
             .code(code)
+            .name(createChatRoomRequest.getName())
             .hidden(createChatRoomRequest.isHidden())
             .passwordRequired(createChatRoomRequest.isPasswordRequired())
             .password(encodedPassword)

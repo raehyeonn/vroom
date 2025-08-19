@@ -44,18 +44,24 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/members").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/members/me").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.POST, "/api/members/nickname").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.GET, "/api/members/me/chat-rooms").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.GET, "/api/members/search").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
 
                 .requestMatchers(HttpMethod.POST, "/api/chat-rooms").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/chat-rooms/search").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
-                .requestMatchers(HttpMethod.GET, "/api/chat-rooms/by-code/{chatRoomCode}").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
-                .requestMatchers(HttpMethod.POST, "/api/chat-rooms/{chatRoomId}/enter").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
-                .requestMatchers(HttpMethod.POST, "/api/chat-rooms/{chatRoomId}/enter-with-password").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}/passwordRequired").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
-                .requestMatchers(HttpMethod.GET, "/api/chat-rooms/me").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.PATCH, "/api/chat-rooms/{chatRoomId}/name").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.POST, "/api/chat-rooms/{chatRoomId}/participants").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.DELETE, "/api/chat-rooms/{chatRoomId}/participants").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+                .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}/participants").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+
+
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}/messages").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
-                .requestMatchers(HttpMethod.POST, "/api/chat-rooms/{chatRoomId}/exit").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
-                .requestMatchers(HttpMethod.GET, "/api/members/search").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
+
+
+
                 .anyRequest().authenticated()
             );
 

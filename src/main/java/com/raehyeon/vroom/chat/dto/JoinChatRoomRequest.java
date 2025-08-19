@@ -5,9 +5,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class GetChatRoomByCodeResponse {
+public class JoinChatRoomRequest {
 
-    private long id;
-    private String name;
+    private String password;
 
 }

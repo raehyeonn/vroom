@@ -36,6 +36,6 @@ public class ChatRoomParticipant {
     private ChatRoom chatRoom;
 
     @Column(nullable = false)
-    private ZonedDateTime enteredAt;
+    private ZonedDateTime joinedAt;
 
 }

@@ -14,7 +14,7 @@ const VerifyChatRoomPasswordModal = ({ isOpen, onClose, onConfirm, password, set
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="비밀번호를 입력하세요"
                 />
-                <button onClick={onConfirm}>확인</button>
+                <button onClick={() => onConfirm(password)}>확인</button>
                 <button onClick={onClose}>취소</button>
             </div>
         </div>

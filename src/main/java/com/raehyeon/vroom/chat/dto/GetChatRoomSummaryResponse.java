@@ -1,16 +1,14 @@
 package com.raehyeon.vroom.chat.dto;
 
-import java.time.ZonedDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class CreateChatRoomResponse {
+public class GetChatRoomSummaryResponse {
 
     private long id;
-    private String code;
     private String name;
-    private ZonedDateTime createdAt;
+    private boolean passwordRequired;
 
 }

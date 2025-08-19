@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class GetChatRoomDetailResponse {
 
-    private String roomName;
+    private String code;
+    private String name;
 
 }

@@ -31,10 +31,10 @@ public class ChatRoom {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String name;
+    private String code;
 
     @Column(nullable = false, unique = true)
-    private String code;
+    private String name;
 
     @Column(nullable = false)
     private boolean hidden;

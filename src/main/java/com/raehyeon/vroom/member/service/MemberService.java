@@ -1,5 +1,11 @@
 package com.raehyeon.vroom.member.service;
 
+import com.raehyeon.vroom.chat.converter.ChatRoomDtoConverter;
+import com.raehyeon.vroom.chat.domain.ChatRoom;
+import com.raehyeon.vroom.chat.domain.ChatRoomParticipant;
+import com.raehyeon.vroom.chat.dto.GetChatRoomSummaryResponse;
+import com.raehyeon.vroom.chat.repository.ChatRoomParticipantRepository;
+import com.raehyeon.vroom.chat.repository.ChatRoomRepository;
 import com.raehyeon.vroom.follow.repository.FollowRepository;
 import com.raehyeon.vroom.member.converter.MemberEntityConverter;
 import com.raehyeon.vroom.member.converter.MemberDtoConverter;
@@ -20,6 +26,8 @@ import com.raehyeon.vroom.role.repository.MemberRoleRepository;
 import com.raehyeon.vroom.role.repository.RoleRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,6 +44,9 @@ public class MemberService {
     private final MemberEntityConverter memberEntityConverter;
     private final MemberDtoConverter memberDtoConverter;
     private final FollowRepository followRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomParticipantRepository chatRoomParticipantRepository;
+    private final ChatRoomDtoConverter chatRoomDtoConverter;
 
     @Transactional
     public CreateMemberResponse createMember(CreateMemberRequest createMemberRequest) {
@@ -91,7 +102,13 @@ public class MemberService {
         } else {
             return null;
         }
+    }
 
+    public Page<GetChatRoomSummaryResponse> getMyChatRooms(UserDetails userDetails, Pageable pageable) {
+        Member currentMember = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
+        Page<ChatRoomParticipant> chatRoomParticipants = chatRoomParticipantRepository.findAllByMember(currentMember, pageable);
+
+        return chatRoomParticipants.map(ChatRoomParticipant::getChatRoom).map(chatRoomDtoConverter::toGetChatRoomSummaryResponse);
     }
 
 }

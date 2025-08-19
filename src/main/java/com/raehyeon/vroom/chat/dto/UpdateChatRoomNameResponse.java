@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class VerifyChatRoomPasswordRequest {
+public class UpdateChatRoomNameResponse {
 
-    private String password;
+    private String name;
 
 }

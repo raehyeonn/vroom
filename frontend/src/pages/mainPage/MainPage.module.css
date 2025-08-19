@@ -112,7 +112,7 @@
   text-align: right;
 }
 
-.addFriends, .addChatRooms {
+.addFriends, .addChatRooms, .searchChatRoom {
   height: 20px;
   width: 20px;
   cursor: pointer;
@@ -222,4 +222,38 @@
   font-weight: bold;
 
   cursor: pointer;
+}
+
+.tabButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.activeTab,
+.inactiveTab {
+  padding: 5px 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 5px;
+  border: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.activeTab {
+  background-color: #842622;
+  color: white;
+}
+
+.inactiveTab {
+  background-color: #f1f1f1;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.inactiveTab:hover {
+  background-color: #e0e0e0;
+  color: #111;
 }
