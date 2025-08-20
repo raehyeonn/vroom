@@ -51,19 +51,18 @@ public class Member {
     @CreationTimestamp(source = SourceType.DB)
     private ZonedDateTime createdAt;
 
-    public void changeNickname(String newNickname) {
-        this.nickname = newNickname;
-    }
-
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<ChatRoomParticipant> chatRoomParticipants = new ArrayList<>();
 
     // 나를 팔로우 하는 사람들
     @OneToMany(mappedBy = "following")
+    @Builder.Default
     private List<Follow> followers = new ArrayList<>();
 
     // 내가 팔로우 하는 사람들
     @OneToMany(mappedBy = "follower")
+    @Builder.Default
     private List<Follow> followings = new ArrayList<>();
 
     @Version
@@ -76,6 +75,10 @@ public class Member {
     @Column(nullable = false)
     @Builder.Default
     private Long followingCount = 0L;
+
+    public void changeNickname(String newNickname) {
+        this.nickname = newNickname;
+    }
 
     public void increaseFollowerCount() {
         this.followerCount++;

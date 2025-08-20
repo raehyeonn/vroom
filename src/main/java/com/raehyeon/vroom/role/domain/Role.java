@@ -33,6 +33,7 @@ public class Role {
     private RoleType roleType;
 
     @OneToMany(mappedBy = "role")
+    @Builder.Default
     private List<MemberRole> memberRoles = new ArrayList<>();
 
 }

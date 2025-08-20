@@ -50,6 +50,7 @@ public class ChatRoom {
     private ZonedDateTime createdAt;
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<ChatRoomParticipant> participants = new ArrayList<>();
 
     public void changeName(String newName) {
