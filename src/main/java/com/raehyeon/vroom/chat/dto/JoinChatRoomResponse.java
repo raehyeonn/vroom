@@ -7,6 +7,6 @@ import lombok.Getter;
 @Builder
 public class JoinChatRoomResponse {
 
-    boolean success;
+    private boolean success;
 
 }

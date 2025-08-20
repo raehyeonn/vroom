@@ -55,12 +55,10 @@ public class Member {
     @Builder.Default
     private List<ChatRoomParticipant> chatRoomParticipants = new ArrayList<>();
 
-    // 나를 팔로우 하는 사람들
     @OneToMany(mappedBy = "following")
     @Builder.Default
     private List<Follow> followers = new ArrayList<>();
 
-    // 내가 팔로우 하는 사람들
     @OneToMany(mappedBy = "follower")
     @Builder.Default
     private List<Follow> followings = new ArrayList<>();

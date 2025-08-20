@@ -57,10 +57,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/chat-rooms/{chatRoomId}/participants").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}/participants").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
 
-
                 .requestMatchers(HttpMethod.GET, "/api/chat-rooms/{chatRoomId}/messages").hasAnyRole(RoleType.MEMBER.name(), RoleType.ADMIN.name())
-
-
 
                 .anyRequest().authenticated()
             );

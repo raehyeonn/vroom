@@ -1,11 +1,9 @@
 package com.raehyeon.vroom.member.service;
 
 import com.raehyeon.vroom.chat.converter.ChatRoomDtoConverter;
-import com.raehyeon.vroom.chat.domain.ChatRoom;
 import com.raehyeon.vroom.chat.domain.ChatRoomParticipant;
 import com.raehyeon.vroom.chat.dto.GetChatRoomSummaryResponse;
 import com.raehyeon.vroom.chat.repository.ChatRoomParticipantRepository;
-import com.raehyeon.vroom.chat.repository.ChatRoomRepository;
 import com.raehyeon.vroom.follow.repository.FollowRepository;
 import com.raehyeon.vroom.member.converter.MemberEntityConverter;
 import com.raehyeon.vroom.member.converter.MemberDtoConverter;
@@ -44,7 +42,6 @@ public class MemberService {
     private final MemberEntityConverter memberEntityConverter;
     private final MemberDtoConverter memberDtoConverter;
     private final FollowRepository followRepository;
-    private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomParticipantRepository chatRoomParticipantRepository;
     private final ChatRoomDtoConverter chatRoomDtoConverter;
 

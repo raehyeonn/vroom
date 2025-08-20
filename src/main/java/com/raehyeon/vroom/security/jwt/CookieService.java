@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CookieService {
 
-    private final TokenProvider tokenProvider;
     private final JwtUtil jwtUtil;
 
     public String extractTokenFromCookie(HttpServletRequest request, String cookieName) {
