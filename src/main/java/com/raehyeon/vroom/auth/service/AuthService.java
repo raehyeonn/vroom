@@ -29,8 +29,8 @@ public class AuthService {
     private final CookieService cookieService;
     private final AuthDtoConverter authDtoConverter;
     private final MemberRepository memberRepository;
-    private final JwtBlacklistService jwtBlacklistService;
     private final JwtUtil jwtUtil;
+    private final JwtBlacklistService jwtBlacklistService;
 
     private Authentication authenticateWithCredentials(LoginRequest loginRequest) {
         try {

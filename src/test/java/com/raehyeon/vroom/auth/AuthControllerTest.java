@@ -1,8 +1,8 @@
 package com.raehyeon.vroom.auth;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,40 +14,36 @@ import com.raehyeon.vroom.auth.dto.LoginResponse;
 import com.raehyeon.vroom.auth.service.AuthService;
 import com.raehyeon.vroom.security.jwt.CookieService;
 import com.raehyeon.vroom.security.jwt.JwtAuthenticationService;
+import com.raehyeon.vroom.security.jwt.JwtBlacklistService;
 import com.raehyeon.vroom.security.jwt.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private AuthService authService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockBean private JwtUtil jwtUtil;
-    @MockBean private JwtAuthenticationService jwtAuthenticationService;
-    @MockBean private CookieService cookieService;
+    @MockitoBean private JwtUtil jwtUtil;
+    @MockitoBean private CookieService cookieService;
+    @MockitoBean private JwtAuthenticationService jwtAuthenticationService;
+    @MockitoBean private JwtBlacklistService jwtBlacklistService;
+    @MockitoBean private AuthService authService;
 
     @Test
     @DisplayName("로그인 성공 시 응답 반환")
     void loginSuccess() throws Exception {
-        // given
         LoginRequest loginRequest = LoginRequest.builder()
             .email("test@example.com")
-            .rawPassword("password1!")
+            .rawPassword("password1234!")
             .build();
 
         LoginResponse loginResponse = LoginResponse.builder()
@@ -57,14 +53,14 @@ public class AuthControllerTest {
 
         when(authService.login(any(), any())).thenReturn(loginResponse);
 
-        // when & then
-        mockMvc.perform(post("/api/auth/login")
-                .with(csrf())
+        mockMvc.perform(post("/api/auth/login") // HTTP 요청
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+                .content(objectMapper.writeValueAsString(loginRequest)))  // 객체를 JSON으로 변환
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.memberId").value(1L))
             .andExpect(jsonPath("$.email").value("test@example.com"));
+
+        verify(authService).login(any(), any());
     }
 
 }

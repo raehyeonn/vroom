@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,17 +37,31 @@ public class AuthServiceTest {
     @Mock private CookieService cookieService;
     @Mock private AuthDtoConverter authDtoConverter;
     @Mock private MemberRepository memberRepository;
-    @Mock private HttpServletResponse response;
-
+    @Mock private HttpServletResponse httpServletResponse;
 
     @Test
-    void 로그인_성공시_토큰과_응답_반환() {
-        LoginRequest loginRequest = LoginRequest.builder()
+    @DisplayName("로그인 시 토큰 발급 및 응답 반환")
+    void createsTokensAndReturnsResponseOnLogin() {
+        Member member = Member.builder()
+            .id(1L)
             .email("test@example.com")
-            .rawPassword("password1!")
+            .password("password1234!")
+            .nickname("testMember")
+            .memberRoles(new ArrayList<>())
+            .createdAt(ZonedDateTime.now())
             .build();
 
-        Authentication mockAuth = mock(Authentication.class);
+        LoginRequest loginRequest = LoginRequest.builder()
+            .email("test@example.com")
+            .rawPassword("password1234!")
+            .build();
+
+        LoginResponse loginResponse = LoginResponse.builder()
+            .memberId(member.getId())
+            .email(member.getEmail())
+            .build();
+
+        Authentication mockAuth = mock(Authentication.class); // Authentication 타입의 가짜 객체
         when(authenticationManager.authenticate(any())).thenReturn(mockAuth);
         when(mockAuth.getName()).thenReturn("test@example.com");
 
@@ -55,31 +70,17 @@ public class AuthServiceTest {
         when(tokenProvider.createAccessToken(mockAuth)).thenReturn(accessToken);
         when(tokenProvider.createRefreshToken(mockAuth)).thenReturn(refreshToken);
 
-        Member mockMember = Member.builder()
-            .id(1L)
-            .email("test@example.com")
-            .password("password1!")
-            .nickname("fiyero")
-            .memberRoles(new ArrayList<>())
-            .createdAt(ZonedDateTime.now())
-            .build();
-        when(memberRepository.findByEmail("test@example.com")).thenReturn(Optional.of(mockMember));
+        when(memberRepository.findByEmail("test@example.com")).thenReturn(Optional.of(member));
+        when(authDtoConverter.toLoginResponse(member.getId(), member.getEmail())).thenReturn(loginResponse);
 
-        LoginResponse loginResponse = LoginResponse.builder()
-            .memberId(mockMember.getId())
-            .email(mockMember.getEmail())
-            .build();
-        when(authDtoConverter.toLoginResponse(mockMember.getId(), mockMember.getEmail())).thenReturn(loginResponse);
+        LoginResponse actualResponse = authService.login(loginRequest, httpServletResponse);
 
-        // when
-        LoginResponse actualResponse = authService.login(loginRequest, response);
-
-        // then
         assertThat(actualResponse).isEqualTo(loginResponse);
 
         verify(authenticationManager).authenticate(any());
         verify(tokenProvider).createAccessToken(mockAuth);
         verify(tokenProvider).createRefreshToken(mockAuth);
-        verify(cookieService).addRefreshTokenCookie(response, refreshToken);
+        verify(cookieService).addRefreshTokenCookie(httpServletResponse, refreshToken);
     }
+
 }
