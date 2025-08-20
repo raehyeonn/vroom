@@ -1,8 +1,8 @@
 package com.raehyeon.vroom.chat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,62 +14,65 @@ import com.raehyeon.vroom.chat.dto.CreateChatRoomResponse;
 import com.raehyeon.vroom.chat.service.ChatRoomService;
 import com.raehyeon.vroom.security.jwt.CookieService;
 import com.raehyeon.vroom.security.jwt.JwtAuthenticationService;
+import com.raehyeon.vroom.security.jwt.JwtBlacklistService;
 import com.raehyeon.vroom.security.jwt.JwtUtil;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
 
 @WebMvcTest(ChatRoomController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class ChatRoomControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
 
-    @MockBean
-    private ChatRoomService chatRoomService;
-
-    @MockBean private JwtUtil jwtUtil;
-    @MockBean private JwtAuthenticationService jwtAuthenticationService;
-    @MockBean private CookieService cookieService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    private String fakeToken;
+    @MockitoBean private JwtUtil jwtUtil;
+    @MockitoBean private CookieService cookieService;
+    @MockitoBean private JwtAuthenticationService jwtAuthenticationService;
+    @MockitoBean private JwtBlacklistService jwtBlacklistService;
+    @MockitoBean private ChatRoomService chatRoomService;
 
     @Test
     @DisplayName("채팅방 생성 성공")
-    void createChatRoom_success() throws Exception {
-        CreateChatRoomRequest request = CreateChatRoomRequest.builder()
+    void createChatRoomSuccess() throws Exception {
+        CreateChatRoomRequest createChatRoomRequest = CreateChatRoomRequest.builder()
             .name("방 이름")
+            .hidden(false)
+            .passwordRequired(false)
+            .password(null)
             .build();
 
-        CreateChatRoomResponse response = CreateChatRoomResponse.builder()
+        ZonedDateTime now = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS); // 정밀도를 나노초에서 밀리초로 낮춘다.
+        String expectedDateTimeString = now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME); // now의 시간대 이름 제거
+
+        CreateChatRoomResponse createChatRoomResponse = CreateChatRoomResponse.builder()
             .id(1L)
-            .name("방 이름")
-            .code("AbcdE12345")
-            .createdAt(ZonedDateTime.now())
+            .code("ABCDE23456")
+            .name("test")
+            .createdAt(now)
             .build();
 
-        given(chatRoomService.createChatRoom(any(CreateChatRoomRequest.class))).willReturn(response);
+        when(chatRoomService.createChatRoom(any(CreateChatRoomRequest.class))).thenReturn(createChatRoomResponse);
 
-        // when & then
         mockMvc.perform(post("/api/chat-rooms")
-                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .content(objectMapper.writeValueAsString(createChatRoomRequest)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1L))
-            .andExpect(jsonPath("$.name").value("방 이름"));
+            .andExpect(jsonPath("$.code").value("ABCDE23456"))
+            .andExpect(jsonPath("$.name").value("test"))
+            .andExpect(jsonPath("$.createdAt").value(expectedDateTimeString));
+
+        verify(chatRoomService).createChatRoom(any(CreateChatRoomRequest.class));
     }
 
 }
-
