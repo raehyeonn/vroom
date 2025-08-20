@@ -1,7 +1,6 @@
 package com.raehyeon.vroom.member.controller;
 
 import com.raehyeon.vroom.chat.dto.GetChatRoomSummaryResponse;
-import com.raehyeon.vroom.chat.service.ChatRoomService;
 import com.raehyeon.vroom.member.dto.ChangeNicknameRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberRequest;
 import com.raehyeon.vroom.member.dto.CreateMemberResponse;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
 
     private final MemberService memberService;
-    private final ChatRoomService chatRoomService;
 
     @PostMapping
     public CreateMemberResponse create(@RequestBody CreateMemberRequest createMemberRequest) {

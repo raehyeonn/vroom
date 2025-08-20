@@ -14,15 +14,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 @DataJpaTest
 public class MemberRepositoryTest {
 
-    @Autowired
-    private MemberRepository memberRepository;
+    @Autowired private MemberRepository memberRepository;
 
     @BeforeEach
     void setUp() {
         Member member = Member.builder()
             .email("test@example.com")
-            .password("password1!")
-            .nickname("tester")
+            .password("password1234!")
+            .nickname("testMember")
             .build();
 
         memberRepository.save(member);
@@ -30,7 +29,7 @@ public class MemberRepositoryTest {
 
     @Test
     @DisplayName("이메일로 회원 존재 여부 확인")
-    void existsByEmail_shouldReturnTrueIfExists() {
+    void shouldReturnTrueWhenMemberExistsWithEmail() {
         boolean exists = memberRepository.existsByEmail("test@example.com");
 
         assertThat(exists).isTrue();
@@ -38,19 +37,19 @@ public class MemberRepositoryTest {
 
     @Test
     @DisplayName("닉네임으로 회원 존재 여부 확인")
-    void existsByNickname_shouldReturnTrueIfExists() {
-        boolean exists = memberRepository.existsByNickname("tester");
+    void shouldReturnTrueWhenMemberExistsWithNickname() {
+        boolean exists = memberRepository.existsByNickname("testMember");
 
         assertThat(exists).isTrue();
     }
 
     @Test
-    @DisplayName("이메일로 회원 조회")
-    void findByEmail_shouldReturnMember() {
+    @DisplayName("이메일로 회원 조회 후 닉네임 확인")
+    void shouldFindMemberByEmailAndMatchNickname() {
         Optional<Member> result = memberRepository.findByEmail("test@example.com");
 
         assertThat(result).isPresent();
-        assertThat(result.get().getNickname()).isEqualTo("tester");
+        assertThat(result.get().getNickname()).isEqualTo("testMember");
     }
 
 }
