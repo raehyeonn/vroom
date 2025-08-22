@@ -11,6 +11,9 @@ import com.raehyeon.vroom.follow.repository.FollowRepository;
 import com.raehyeon.vroom.member.domain.Member;
 import com.raehyeon.vroom.member.exception.MemberNotFoundException;
 import com.raehyeon.vroom.member.repository.MemberRepository;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,9 +62,18 @@ public class FollowService {
         Member currentMember = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
         Page<Follow> followEntities = followRepository.findAllByFollowing(currentMember, pageable);
 
+        List<Member> followers = followEntities.getContent().stream()
+            .map(follow -> follow.getFollower())
+            .toList();
+        List<Follow> myFollowings = followRepository.findAllByFollowerAndFollowingIn(currentMember, followers);
+
+        Set<Long> followingIds = myFollowings.stream()
+            .map(follow -> follow.getFollowing().getId())
+            .collect(Collectors.toSet());
+
         return followEntities.map(follow -> {
             Member follower = follow.getFollower();
-            boolean isFollowedByMe = followRepository.existsByFollowerAndFollowing(currentMember, follower);
+            boolean isFollowedByMe = followingIds.contains(follower.getId());
 
             return followDtoConverter.toGetFollowerResponse(follower, isFollowedByMe);
         });
