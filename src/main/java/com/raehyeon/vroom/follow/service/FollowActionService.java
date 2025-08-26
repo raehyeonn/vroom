@@ -3,9 +3,13 @@ package com.raehyeon.vroom.follow.service;
 import jakarta.persistence.OptimisticLockException;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FollowActionService {
@@ -15,21 +19,21 @@ public class FollowActionService {
     public void executeFollowMember(UserDetails userDetails, String nickname) {
         int retries = 0;
 
-        while (retries < 3) {
+        while (retries < 10) {
             try {
                 followService.followMember(userDetails, nickname);
 
                 return;
-            } catch (OptimisticLockException e) {
+            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | CannotAcquireLockException e) {
                 retries++;
+                log.warn("락 충돌 발생 - {}회차 재시도", retries, e);
 
-                int backoff = (int) Math.pow(2, retries) * 75;
-                int delay = ThreadLocalRandom.current().nextInt(backoff, backoff + 200);
+                int delay = ThreadLocalRandom.current().nextInt(10, 1000);
 
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException ignored) {
-
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -40,21 +44,21 @@ public class FollowActionService {
     public void executeUnfollowMember(UserDetails userDetails, String nickname) {
         int retries = 0;
 
-        while (retries < 3) {
+        while (retries < 10) {
             try {
-                followService.unfollowMember(userDetails, nickname);
+                followService.followMember(userDetails, nickname);
 
                 return;
-            } catch (OptimisticLockException e) {
+            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | CannotAcquireLockException e) {
                 retries++;
+                log.warn("락 충돌 발생 - {}회차 재시도", retries, e);
 
-                int backoff = (int) Math.pow(2, retries) * 75;
-                int delay = ThreadLocalRandom.current().nextInt(backoff, backoff + 200);
+                int delay = ThreadLocalRandom.current().nextInt(10, 1000);
 
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException ignored) {
-
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -65,26 +69,26 @@ public class FollowActionService {
     public void executeRemoveFollower(UserDetails userDetails, String nickname) {
         int retries = 0;
 
-        while (retries < 3) {
+        while (retries < 10) {
             try {
-                followService.removeFollower(userDetails, nickname);
+                followService.followMember(userDetails, nickname);
 
                 return;
-            } catch (OptimisticLockException e) {
+            } catch (OptimisticLockException | ObjectOptimisticLockingFailureException | CannotAcquireLockException e) {
                 retries++;
+                log.warn("락 충돌 발생 - {}회차 재시도", retries, e);
 
-                int backoff = (int) Math.pow(2, retries) * 75;
-                int delay = ThreadLocalRandom.current().nextInt(backoff, backoff + 200);
+                int delay = ThreadLocalRandom.current().nextInt(10, 1000);
 
                 try {
                     Thread.sleep(delay);
                 } catch (InterruptedException ignored) {
-
+                    Thread.currentThread().interrupt();
                 }
             }
         }
 
-        throw new RuntimeException("팔로워 삭제 실패");
+        throw new RuntimeException("필로워 삭제 실패");
     }
 
 }
