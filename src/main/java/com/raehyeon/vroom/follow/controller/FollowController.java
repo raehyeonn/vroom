@@ -2,7 +2,6 @@ package com.raehyeon.vroom.follow.controller;
 
 import com.raehyeon.vroom.follow.dto.GetFollowerResponse;
 import com.raehyeon.vroom.follow.dto.GetFollowingResponse;
-import com.raehyeon.vroom.follow.service.FollowActionService;
 import com.raehyeon.vroom.follow.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,17 +20,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class FollowController {
 
-    private final FollowActionService followActionService;
     private final FollowService followService;
 
     @PostMapping("/{targetNickname}/follow")
     public void followMember(@AuthenticationPrincipal UserDetails userDetails, @PathVariable String targetNickname) {
-        followActionService.executeFollowMember(userDetails, targetNickname);
+        followService.followMember(userDetails, targetNickname);
     }
 
     @DeleteMapping("/{targetNickname}/follow")
     public void unfollowMember(@AuthenticationPrincipal UserDetails userDetails, @PathVariable String targetNickname) {
-        followActionService.executeUnfollowMember(userDetails, targetNickname);
+        followService.unfollowMember(userDetails, targetNickname);
     }
 
     @GetMapping("/me/followers")
@@ -46,7 +44,7 @@ public class FollowController {
 
     @DeleteMapping("/me/followers/{targetNickname}")
     public void removeFollower(@AuthenticationPrincipal UserDetails userDetails, @PathVariable String targetNickname) {
-        followActionService.executeRemoveFollower(userDetails, targetNickname);
+        followService.removeFollower(userDetails, targetNickname);
     }
 
 }

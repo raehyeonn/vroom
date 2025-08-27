@@ -1,3 +1,4 @@
+/*
 package com.raehyeon.vroom.follow.service;
 
 import jakarta.persistence.OptimisticLockException;
@@ -92,3 +93,4 @@ public class FollowActionService {
     }
 
 }
+*/

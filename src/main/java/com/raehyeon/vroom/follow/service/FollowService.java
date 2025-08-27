@@ -33,8 +33,8 @@ public class FollowService {
 
     @Transactional
     public void followMember(UserDetails userDetails, String targetNickname) {
-        Member currentMember = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
-        Member targetMember = memberRepository.findByNickname(targetNickname).orElseThrow(MemberNotFoundException::new);
+        Member currentMember = memberRepository.findByEmailWithLock(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
+        Member targetMember = memberRepository.findByNicknameWithLock(targetNickname).orElseThrow(MemberNotFoundException::new);
 
         if (followRepository.existsByFollowerAndFollowing(currentMember, targetMember)) {
             throw new AlreadyFollowingException();
@@ -49,8 +49,8 @@ public class FollowService {
 
     @Transactional
     public void unfollowMember(UserDetails userDetails, String targetNickname) {
-        Member currentMember = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
-        Member targetMember = memberRepository.findByNickname(targetNickname).orElseThrow(MemberNotFoundException::new);
+        Member currentMember = memberRepository.findByEmailWithLock(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
+        Member targetMember = memberRepository.findByNicknameWithLock(targetNickname).orElseThrow(MemberNotFoundException::new);
         Follow follow = followRepository.findByFollowerAndFollowing(currentMember, targetMember).orElseThrow(FollowNotFoundException::new);
         followRepository.delete(follow);
 
@@ -92,8 +92,8 @@ public class FollowService {
 
     @Transactional
     public void removeFollower(UserDetails userDetails, String targetNickname) {
-        Member currentMember = memberRepository.findByEmail(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
-        Member targetMember = memberRepository.findByNickname(targetNickname).orElseThrow(MemberNotFoundException::new);
+        Member currentMember = memberRepository.findByEmailWithLock(userDetails.getUsername()).orElseThrow(MemberNotFoundException::new);
+        Member targetMember = memberRepository.findByNicknameWithLock(targetNickname).orElseThrow(MemberNotFoundException::new);
         Follow follow = followRepository.findByFollowerAndFollowing(targetMember, currentMember).orElseThrow(FollowNotFoundException::new);
         followRepository.delete(follow);
 

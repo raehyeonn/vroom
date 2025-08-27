@@ -1,3 +1,4 @@
+/*
 package com.raehyeon.vroom.follow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -120,3 +121,4 @@ public class FollowOptimisticLockTest {
     }
 
 }
+*/

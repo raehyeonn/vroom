@@ -11,7 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,9 +61,6 @@ public class Member {
     @OneToMany(mappedBy = "follower")
     @Builder.Default
     private List<Follow> followings = new ArrayList<>();
-
-    @Version
-    private Long version;
 
     @Column(nullable = false)
     @Builder.Default
