@@ -1,5 +1,6 @@
 package com.raehyeon.vroom.chat.controller;
 
+import com.raehyeon.vroom.chat.dto.GetChatRoomRankingResponse;
 import com.raehyeon.vroom.chat.dto.UpdateChatRoomNameRequest;
 import com.raehyeon.vroom.chat.dto.JoinChatRoomResponse;
 import com.raehyeon.vroom.chat.dto.CreateChatRoomRequest;
@@ -10,6 +11,7 @@ import com.raehyeon.vroom.chat.dto.GetChatRoomDetailResponse;
 import com.raehyeon.vroom.chat.dto.JoinChatRoomRequest;
 import com.raehyeon.vroom.chat.dto.UpdateChatRoomNameResponse;
 import com.raehyeon.vroom.chat.service.ChatRoomService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,6 +77,11 @@ public class ChatRoomController {
     @GetMapping("/{chatRoomId}/participants")
     public Page<GetChatRoomParticipantResponse> getChatRoomParticipants(@PathVariable Long chatRoomId, Pageable pageable) {
         return chatRoomService.getChatRoomParticipants(chatRoomId, pageable);
+    }
+
+    @GetMapping("/ranking")
+    public List<GetChatRoomRankingResponse> getChatRoomRanking() {
+        return chatRoomService.getChatRoomRanking();
     }
 
 }

@@ -15,10 +15,13 @@ import com.raehyeon.vroom.member.exception.MemberNotFoundException;
 import com.raehyeon.vroom.member.repository.MemberRepository;
 import java.security.Principal;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ public class ChatMessageService {
     private final ChatMessageDtoConverter chatMessageDtoConverter;
     private final ChatMessageEntityConverter chatMessageEntityConverter;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public void createMessage(Long chatRoomId, Principal principal, SendChatMessageRequest sendChatMessageRequest) {
@@ -47,8 +51,18 @@ public class ChatMessageService {
 
         SendChatMessageResponse sendChatMessageResponse = chatMessageDtoConverter.toSendChatMessageResponse(chatRoom, member, chatMessage);
         simpMessagingTemplate.convertAndSend("/sub/" + chatRoomId, sendChatMessageResponse);
-    }
 
+        ZonedDateTime now = ZonedDateTime.now();
+        int currentMinute = now.getMinute();
+        int roundedMinute = (currentMinute / 10) * 10;
+
+        ZonedDateTime roundedTime = now.withMinute(roundedMinute).withSecond(0).withNano(0);
+        String timeKey = roundedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm"));
+        String redisKey = "chatroom:ranking:" + timeKey;
+
+        redisTemplate.opsForZSet().incrementScore(redisKey, chatRoom.getName(), 1);
+        redisTemplate.expire(redisKey, 15, TimeUnit.MINUTES);
+    }
 
     public GetPastChatMessagesResponse getMessages(Long chatRoomId, ZonedDateTime cursor) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow(ChatRoomNotFoundException::new);

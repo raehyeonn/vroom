@@ -5,6 +5,7 @@ import com.raehyeon.vroom.chat.converter.ChatRoomEntityConverter;
 import com.raehyeon.vroom.chat.converter.ChatRoomParticipantEntityConverter;
 import com.raehyeon.vroom.chat.domain.ChatRoom;
 import com.raehyeon.vroom.chat.domain.ChatRoomParticipant;
+import com.raehyeon.vroom.chat.dto.GetChatRoomRankingResponse;
 import com.raehyeon.vroom.chat.dto.UpdateChatRoomNameRequest;
 import com.raehyeon.vroom.chat.dto.UpdateChatRoomNameResponse;
 import com.raehyeon.vroom.chat.dto.JoinChatRoomResponse;
@@ -23,12 +24,20 @@ import com.raehyeon.vroom.chat.repository.ChatRoomRepository;
 import com.raehyeon.vroom.member.domain.Member;
 import com.raehyeon.vroom.member.exception.MemberNotFoundException;
 import com.raehyeon.vroom.member.repository.MemberRepository;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,6 +58,7 @@ public class ChatRoomService {
     private final MemberRepository memberRepository;
     private final ChatRoomParticipantRepository chatRoomParticipantRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Transactional
     public CreateChatRoomResponse createChatRoom(CreateChatRoomRequest createChatRoomRequest) {
@@ -149,6 +159,35 @@ public class ChatRoomService {
         Page<ChatRoomParticipant> chatRoomParticipants = chatRoomParticipantRepository.findAllByChatRoom(chatRoom, pageable);
 
         return chatRoomParticipants.map(chatRoomDtoConverter::toGetChatRoomParticipantResponse);
+    }
+
+    public List<GetChatRoomRankingResponse> getChatRoomRanking() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int currentMinute = now.getMinute();
+        int roundedMinute = (currentMinute / 10) * 10;
+
+        ZonedDateTime previousTime = now.withMinute(roundedMinute).withSecond(0).withNano(0).minusMinutes(10);
+        String timeKey = previousTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HH:mm"));
+        String redisKey = "chatroom:ranking:" + timeKey;
+
+        int limit = 5;
+
+        // 점수 기준으로 내림차순 정렬된 요소들 중 상위 5개 가져옴.
+        Set<TypedTuple<String>> top = redisTemplate.opsForZSet().reverseRangeWithScores(redisKey, 0, limit - 1);
+
+        List<GetChatRoomRankingResponse> list = new ArrayList<>();
+        int rank = 1;
+
+        for(ZSetOperations.TypedTuple<String> tuple : top) {
+            list.add(GetChatRoomRankingResponse.builder()
+                .rank(rank)
+                .name(tuple.getValue())
+                .build());
+
+            rank++;
+        }
+
+        return list;
     }
 
 }
